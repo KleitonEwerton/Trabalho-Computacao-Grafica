@@ -1,4 +1,4 @@
-<h1 align="center">U.T.Info</h1>
+<h1 align="center">🛩️ Plane shooter 🛩️</h1>
 
 <p align="center">Projeto desenvolvido em Java Script durante o trabalho avaliativo da disciplina de computação gráfica, ministrada pelo professor Rodrigo Luis de Souza da Silva<a href="https://sites.google.com/site/rodrigoluis/"> DCC - UFJF</a></p>
 
