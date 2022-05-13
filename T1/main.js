@@ -10,30 +10,15 @@ import {initRenderer,
         onWindowResize,
         createGroundPlaneXZ, createGroundPlaneWired} from "../libs/util/util.js";
 
-class Retangulo {
-
-  constructor(altura, largura) {
-
-    this.altura = altura;
-    this.largura = largura;
-
-    let cubeGeometry = new THREE.BoxGeometry(largura, altura, largura);
-    this.cube = new THREE.Mesh(cubeGeometry, material);
-    this.cube.position.set(0, 10, -15.0);
-
-  }
-  cube(){
-   return this.cube();
-  }
-}      
+import {Retangulo} from './aviao.js';
+     
 
 
 let keyboard = new KeyboardState();
 
-let scene, renderer, camera, material, light; // variables 
-scene = new THREE.Scene();    // Create main scene
+let scene, renderer, camera,  plane, plane2; // variables 
+scene = new THREE.Scene();                    // Create main scene
 renderer = initRenderer();    // Init a basic renderer
-material = initBasicMaterial(); // create a basic material
 
 scene.add(new THREE.HemisphereLight());
 
@@ -54,8 +39,16 @@ let axesHelper = new THREE.AxesHelper( 50 );
 scene.add( axesHelper );
 
 // create the ground plane
-let plane = createGroundPlaneWired(150,150,50,50);
+plane = createGroundPlaneWired(200,200,50,50);
 scene.add(plane);
+plane2 = createGroundPlaneWired(200,200,50,50);
+scene.add(plane2);
+
+let posZPlane1 = 0;
+let posZPlane2 = -200;
+
+plane.position.z = posZPlane1;
+plane2.position.z = posZPlane2;
 
 //camera position
 var cameraHolder  = new THREE.Object3D();
@@ -68,8 +61,17 @@ scene.add(cameraHolder);
 
 
 let aviao; 
-aviao = new Retangulo(0.5,2);
+aviao = new Retangulo(0.5,2, 0,0,-20);
 scene.add(aviao.cube);
+
+let aviao2; 
+aviao2 = new Retangulo(0.5,2, 0,0,-30);
+scene.add(aviao2.cube);
+
+//Configurações de controle do plano
+let fatorLimite = -200;
+let limitador = fatorLimite;
+let controle = 0;
 
 render();
 
@@ -78,23 +80,40 @@ function keyboardCamera(){
   
   keyboard.update();
 
+  
 
-  if ( keyboard.down("up") )   aviao.cube.translateZ(-1);
-  if ( keyboard.down("down") ) aviao.cube.translateZ(1);
+  if ( keyboard.pressed("up") ) aviao.cube.position.lerp(new THREE.Vector3(0.0, 0.0, 0.0), -0.001);
 
-  if ( keyboard.down("right") ) aviao.cube.translateX(1);
-  if ( keyboard.down("left") ) aviao.cube.translateX(-1);
-
-  if ( keyboard.down("D") ) {aviao.cube.removeFromParent (); aviao.cube.translateX(-1);}
 
 
 }
 
 function att(){
 
-  cameraHolder.translateZ(-0.02);
-  aviao.cube.translateZ(-0.02);
- 
+  
+  cameraHolder.translateZ(-0.9);
+
+  console.log(cameraHolder.position.z, plane.position.z, plane2.position.z, limitador);
+
+  renderInfPlane();
+
+}
+
+function renderInfPlane(){
+  if(cameraHolder.position.z < limitador){
+
+    if(controle % 2 == 0){
+
+      limitador += -200;
+      plane.position.z = limitador;
+  
+
+    }else{
+      limitador += -200;  
+      plane2.position.z = limitador;
+    }
+    controle += 1;
+  }
 }
 
 function render()
