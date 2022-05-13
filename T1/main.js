@@ -44,6 +44,7 @@ camera.lookAt(0, 0, 0);
 camera.rotateX(  -1.6 );
 
 scene.add(camera);
+window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
 //medium.com/geekculture/making-a-3d-web-runner-game-4-making-an-infinite-plane-with-a-shader-48a0c63bc8d2
 //https:codepen.io/DonKarlssonSan/pen/deVYoZ
@@ -64,15 +65,6 @@ cameraHolder.add(camera);
 cameraHolder.position.set(0,20,0);
 
 scene.add(cameraHolder);
-
-// let cubeGeometry = new THREE.BoxGeometry(2, 0.5, 2);
-// let cube = new THREE.Mesh(cubeGeometry, material);
-
-// // position the cube
-// cube.position.set(0, 10, -15.0);
-
-// // add the cube to the scene
-// scene.add(cube);
 
 
 let aviao; 
