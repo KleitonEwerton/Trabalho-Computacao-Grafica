@@ -1,126 +1,125 @@
-import * as THREE from  'three';
-import { OrbitControls } from '../build/jsm/controls/OrbitControls.js';
-import KeyboardState from '../libs/util/KeyboardState.js'
+import * as THREE from "three";
+import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
+import KeyboardState from "../libs/util/KeyboardState.js";
 
-import {initRenderer, 
-        initCamera,
-        initDefaultBasicLight,
-        initBasicMaterial,
-        InfoBox,
-        onWindowResize,
-        createGroundPlaneXZ, createGroundPlaneWired} from "../libs/util/util.js";
+import {
+  initRenderer,
+  initCamera,
+  initDefaultBasicLight,
+  initBasicMaterial,
+  InfoBox,
+  onWindowResize,
+  createGroundPlaneWired,
+} from "../libs/util/util.js";
 
-import {Retangulo} from './aviao.js';
-     
-
+import { Retangulo } from "./aviao.js";
 
 let keyboard = new KeyboardState();
 
-let scene, renderer, camera,  plane, plane2; // variables 
-scene = new THREE.Scene();                    // Create main scene
-renderer = initRenderer();    // Init a basic renderer
+let scene,
+  renderer,
+  camera,
+  cameraHolder,
+  plane,
+  plane2,
+  planeSize,
+  limiterPlane,
+  controlsPlane,
+  aviao;
 
-scene.add(new THREE.HemisphereLight());
+planeSize = 300; //Tamanho do plano
+scene = new THREE.Scene(); // Create main scene
+renderer = initRenderer(); // Init a basic renderer
 
-camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 1);
-camera.up.set( 0, 0, 0);
-camera.lookAt(0, 0, 0);
-camera.rotateX(  -1.6 );
+scene.add(new THREE.HemisphereLight()); //Luz
 
-scene.add(camera);
-window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
+configCamera();
 
-//medium.com/geekculture/making-a-3d-web-runner-game-4-making-an-infinite-plane-with-a-shader-48a0c63bc8d2
-//https:codepen.io/DonKarlssonSan/pen/deVYoZ
+createPlanes();
 
-// Show axes (parameter is size of each axis)
-let axesHelper = new THREE.AxesHelper( 50 );
-scene.add( axesHelper );
-
-// create the ground plane
-plane = createGroundPlaneWired(200,200,50,50);
-scene.add(plane);
-plane2 = createGroundPlaneWired(200,200,50,50);
-scene.add(plane2);
-
-let posZPlane1 = 0;
-let posZPlane2 = -200;
-
-plane.position.z = posZPlane1;
-plane2.position.z = posZPlane2;
-
-//camera position
-var cameraHolder  = new THREE.Object3D();
-
-cameraHolder.add(camera);
-
-cameraHolder.position.set(0,20,0);
-
-scene.add(cameraHolder);
-
-
-let aviao; 
-aviao = new Retangulo(0.5,2, 0,0,-20);
+aviao = new Retangulo(0.5, 2, 0, 5, -20);
 scene.add(aviao.cube);
 
-let aviao2; 
-aviao2 = new Retangulo(0.5,2, 0,0,-30);
-scene.add(aviao2.cube);
-
 //Configurações de controle do plano
-let fatorLimite = -200;
-let limitador = fatorLimite;
-let controle = 0;
+limiterPlane = -planeSize;
+controlsPlane = 0;
 
 render();
 
-function keyboardCamera(){
-
-  
+function keyboardCamera() {
   keyboard.update();
 
-  
-
-  if ( keyboard.pressed("up") ) aviao.cube.position.lerp(new THREE.Vector3(0.0, 0.0, 0.0), -0.001);
-
-
-
+  if (keyboard.pressed("up")) aviao.moveInZ(-0.2, 0.001);
+  if (keyboard.pressed("down")) aviao.moveInZ(0.2, 0.001);
+  if (keyboard.pressed("left")) aviao.moveInX(-0.2, 0.001);
+  if (keyboard.pressed("right")) aviao.moveInX(0.2, 0.001);
 }
 
-function att(){
-
-  
-  cameraHolder.translateZ(-0.9);
-
-  console.log(cameraHolder.position.z, plane.position.z, plane2.position.z, limitador);
-
-  renderInfPlane();
-
+function runAnimations() {
+  cameraHolder.translateZ(-0.4);
+  console.log(cameraHolder.position, aviao.getVectorPosition());
+  aviao.moveInZ(-0.4, 1);
+  renderInfinityPlane();
 }
 
-function renderInfPlane(){
-  if(cameraHolder.position.z < limitador){
+function render() {
+  runAnimations();
+  keyboardCamera();
+  requestAnimationFrame(render);
+  renderer.render(scene, camera); // Render scene
+}
 
-    if(controle % 2 == 0){
+// Renderiza o plano infinitamente
+function renderInfinityPlane() {
+  if (cameraHolder.position.z < limiterPlane) {
+    limiterPlane += -planeSize;
 
-      limitador += -200;
-      plane.position.z = limitador;
-  
+    if (controlsPlane % 2 == 0) plane.position.z = limiterPlane;
+    else plane2.position.z = limiterPlane;
 
-    }else{
-      limitador += -200;  
-      plane2.position.z = limitador;
-    }
-    controle += 1;
+    controlsPlane += 1;
   }
 }
 
-function render()
-{
-  att();
-  keyboardCamera();
-  requestAnimationFrame(render);
-  renderer.render(scene, camera) // Render scene
+function configCamera() {
+  camera = new THREE.PerspectiveCamera(
+    70,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  camera.position.set(0, 0, 1);
+  camera.up.set(0, 0, 0);
+  camera.lookAt(0, 0, 0);
+  camera.rotateX(-1.6);
+  scene.add(camera);
+
+  window.addEventListener(
+    "resize",
+    function () {
+      onWindowResize(camera, renderer);
+    },
+    false
+  );
+
+  //camera position
+  cameraHolder = new THREE.Object3D();
+
+  cameraHolder.add(camera);
+
+  cameraHolder.position.set(0, 20, 0);
+
+  scene.add(cameraHolder);
 }
 
+function createPlanes() {
+  // create the ground plane
+  plane = createGroundPlaneWired(planeSize, planeSize, 50, 50);
+  plane2 = createGroundPlaneWired(planeSize, planeSize, 50, 50);
+
+  scene.add(plane);
+  scene.add(plane2);
+
+  plane.position.z = 0;
+  plane2.position.z = -planeSize;
+}

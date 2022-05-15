@@ -9,28 +9,39 @@ export class Retangulo {
       this.altura = altura;
       this.largura = largura;
       
+
   
       let cubeGeometry = new THREE.BoxGeometry(largura, altura, largura);
       this.cube = new THREE.Mesh(cubeGeometry, material);
-      this.cube.position.set(posx,posy,posz);
+      this.cube.position.set(posx, posy, posz);
+
+      this.vectorPosition = new THREE.Vector3();
+      this.vectorPosition.copy(this.cube.position);
   
     }
     cube(){
      return this.cube();
     }
   
-    moveInX(qntMove){
-      this.cube.translateX(qntMove);
+    moveInX(qntMove, alpha) {
+      this.vectorPosition.x += qntMove;
+      this.cube.position.lerp(this.vectorPosition, alpha);
 
     }
 
-    moveInY(qntMove){
-      this.cube.translateY(qntMove);
+    moveInY(qntMove, alpha){
+      this.vectorPosition.y += qntMove;
+      this.cube.position.lerp(this.vectorPosition, alpha);
+
 
     }
-    moveInZ(qntMove){
-      this.cube.translateZ(qntMove);
+    moveInZ(qntMove, alpha){
+      this.vectorPosition.z += qntMove;
+      this.cube.position.lerp(this.vectorPosition, alpha);
     }
     
+    getVectorPosition(){
+      return this.vectorPosition;
+    }
   
   }  
