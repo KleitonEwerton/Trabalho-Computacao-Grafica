@@ -49,15 +49,27 @@ render();
 function keyboardCamera() {
   keyboard.update();
 
-  if (keyboard.pressed("up")) aviao.moveInZ(-0.2, 0.001);
-  if (keyboard.pressed("down")) aviao.moveInZ(0.2, 0.001);
-  if (keyboard.pressed("left")) aviao.moveInX(-0.2, 0.001);
-  if (keyboard.pressed("right")) aviao.moveInX(0.2, 0.001);
+  const frustum = new THREE.Frustum()
+  const matrix = new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+  frustum.setFromProjectionMatrix(matrix)
+
+  if (keyboard.pressed("up") && frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInZ(-0.2, 0.001);
+  if (keyboard.pressed("up") && !frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInZ(0.2, 0.001);
+
+  if (keyboard.pressed("down") && frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInZ(0.2, 0.001);
+  if (keyboard.pressed("down") && !frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInZ(-0.2, 0.001);
+
+  if (keyboard.pressed("left") && frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInX(-0.2, 0.001);
+  if (keyboard.pressed("left") && !frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInX(0.2, 0.001);
+
+  if (keyboard.pressed("right") && frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInX(0.2, 0.001);
+  if (keyboard.pressed("right") && !frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInX(-0.2, 0.001);
 }
 
 function runAnimations() {
   cameraHolder.translateZ(-0.4);
   console.log(cameraHolder.position, aviao.getVectorPosition());
+
   aviao.moveInZ(-0.4, 1);
   renderInfinityPlane();
 }
