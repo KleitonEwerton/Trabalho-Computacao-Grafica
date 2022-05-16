@@ -4,10 +4,6 @@ import KeyboardState from "../libs/util/KeyboardState.js";
 
 import {
   initRenderer,
-  initCamera,
-  initDefaultBasicLight,
-  initBasicMaterial,
-  InfoBox,
   onWindowResize,
   createGroundPlaneWired,
 } from "../libs/util/util.js";
@@ -25,9 +21,15 @@ let scene,
   planeSize,
   limiterPlane,
   controlsPlane,
-  aviao;
+  aviao,
+  speed,
+  moveSpeedAirplane;
 
+//----------------------------- CONFIGS ---------------------------------//
 planeSize = 300; //Tamanho do plano
+speed = 1;
+moveSpeedAirplane = 0.4;
+
 scene = new THREE.Scene(); // Create main scene
 renderer = initRenderer(); // Init a basic renderer
 
@@ -49,16 +51,18 @@ render();
 function keyboardCamera() {
   keyboard.update();
 
-  if (keyboard.pressed("up")) aviao.moveInZ(-0.2, 0.001);
-  if (keyboard.pressed("down")) aviao.moveInZ(0.2, 0.001);
-  if (keyboard.pressed("left")) aviao.moveInX(-0.2, 0.001);
-  if (keyboard.pressed("right")) aviao.moveInX(0.2, 0.001);
+  if (keyboard.pressed("up")) aviao.moveInZ(-moveSpeedAirplane, 0.005);
+  if (keyboard.pressed("down")) aviao.moveInZ(moveSpeedAirplane, 0.005);
+  if (keyboard.pressed("left")) aviao.moveInX(-moveSpeedAirplane, 2*0.005);
+  if (keyboard.pressed("right")) aviao.moveInX(moveSpeedAirplane, 2*0.005);
+  if (keyboard.down("space")) aviao.shot(scene);
 }
 
 function runAnimations() {
-  cameraHolder.translateZ(-0.4);
-  console.log(cameraHolder.position, aviao.getVectorPosition());
-  aviao.moveInZ(-0.4, 1);
+  cameraHolder.translateZ(-speed);
+  // console.log(cameraHolder.position, aviao.getVectorPosition());
+  aviao.updateShot(2 * speed); //Atualiza as posições dos tiros
+  aviao.moveInZ(-speed, 1); //Atualzia a posição do aviao
   renderInfinityPlane();
 }
 
@@ -91,7 +95,7 @@ function configCamera() {
   camera.position.set(0, 0, 1);
   camera.up.set(0, 0, 0);
   camera.lookAt(0, 0, 0);
-  camera.rotateX(-1.6);
+  camera.rotateX(-1.7);
   scene.add(camera);
 
   window.addEventListener(
