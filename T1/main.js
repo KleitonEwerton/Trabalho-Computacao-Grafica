@@ -40,6 +40,11 @@ createPlanes();
 aviao = new Retangulo(0.5, 2, 0, 5, -20);
 scene.add(aviao.cube);
 
+let p1, p2, p3;
+p1 = new Retangulo(0.5, 2, 0, 5, -50);
+scene.add(p1.cube);
+p1.moveInZ(-0.4, 1);
+
 //Configurações de controle do plano
 limiterPlane = -planeSize;
 controlsPlane = 0;
@@ -53,26 +58,81 @@ function keyboardCamera() {
   const matrix = new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
   frustum.setFromProjectionMatrix(matrix);
 
-
-  if (keyboard.pressed("up") && frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInZ(-0.2, 0.001);
-  if (keyboard.pressed("up") && !frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInZ(0.2, 0.001);
-
-  if (keyboard.pressed("down") && frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInZ(0.2, 0.001);
-  if (keyboard.pressed("down") && !frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInZ(-0.2, 0.001);
-
-  if (keyboard.pressed("left") && frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInX(-0.2, 0.001);
-  if (keyboard.pressed("left") && !frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInX(0.2, 0.001);
-
-  if (keyboard.pressed("right") && frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInX(0.2, 0.001);
-  if (keyboard.pressed("right") && !frustum.containsPoint(aviao.getVectorPosition())) aviao.moveInX(-0.2, 0.001);
+  let position1 = new THREE.Vector3();
+  position1.setFromMatrixPosition(aviao.cube.matrixWorld);
+  
+  if (keyboard.pressed("up")) {
+    position1.z -= 0.2;
+    if (frustum.containsPoint(position1)) aviao.moveInZ(-0.2, 0.001);
+      else aviao.moveInZ(0.2, 0.001);
+  }
+  if (keyboard.pressed("down")) {
+    position1.z += 0.2;
+    
+    if (frustum.containsPoint(position1)) aviao.moveInZ(0.2, 0.001);
+    else aviao.moveInZ(-0.2, 0.001);
+  }
+  if (keyboard.pressed("left")) {
+    position1.x -= 0.2;
+    
+    if (frustum.containsPoint(position1)) aviao.moveInX(-0.2, 0.001);
+    else aviao.moveInX(0.2, 0.001);
+  }
+  if (keyboard.pressed("right")) {
+    position1.x += 0.2;
+    
+    if (frustum.containsPoint(position1)) aviao.moveInX(0.2, 0.001);
+    else aviao.moveInX(-0.2, 0.001);
+  }
 }
 
 function runAnimations() {
   cameraHolder.translateZ(-0.4);
-  console.log(cameraHolder.position, aviao.getVectorPosition());
+  //console.log(cameraHolder.position, aviao.getVectorPosition());
+  //console.log("1: " + plane.position.z);
+  //console.log("2 :" + plane2.position.z);
+  projeteis();
   aviao.moveInZ(-0.4, 1);
   renderInfinityPlane();
 }
+
+function projeteis() {
+  const frustum = new THREE.Frustum();
+  const matrix = new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+  frustum.setFromProjectionMatrix(matrix);
+
+  //console.log(matrix.getMaxScaleOnAxis());
+
+  //console.log(p1.getVectorPosition());
+  if (!frustum.containsPoint(p1.getVectorPosition())) {
+
+    // console.log("1: " + plane.position.z);
+    // console.log("2: " + plane2.position.z);
+    //  console.log("3: " + cameraHolder.position.z);
+    //  console.log("a: "+aviao.cube.position.z);
+
+    if (plane.position.z < plane2.position.z) {
+      //var plano = plane.position.z - 100;
+      //console.log(plano);
+      // var Z1 = getRandomArbitrary(plane.position.z, aviao.cube.position.z);
+      var Z1 = plane.position.z;
+      
+    }
+    else {
+      // var Z1 = getRandomArbitrary(plane2.position.z, aviao.cube.position.z);
+      var Z1 = plane2.position.z;
+    }
+    var X1 = getRandomArbitrary(-10, 10);
+    //console.log(Z1);
+
+    scene.remove(p1.cube);
+    p1 = new Retangulo(0.5, 2, X1, 5, Z1);
+    //console.log("OI");
+    scene.add(p1.cube);
+    p1.moveInZ(-0.8, 1);
+  }
+}
+
 
 function render() {
   runAnimations();
@@ -91,6 +151,10 @@ function renderInfinityPlane() {
 
     controlsPlane += 1;
   }
+}
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
 function configCamera() {
@@ -119,7 +183,7 @@ function configCamera() {
 
   cameraHolder.add(camera);
 
-  cameraHolder.position.set(0, 20, 0);
+  cameraHolder.position.set(0, 15, 0);
 
   scene.add(cameraHolder);
 }
