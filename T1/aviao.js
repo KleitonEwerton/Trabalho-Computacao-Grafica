@@ -1,21 +1,28 @@
 import * as THREE from "three";
 import { FaceColors } from "../build/three.module.js";
 import { initBasicMaterial } from "../libs/util/util.js";
+import { Projetil } from "./projetil.js";
+
+const geometry = new THREE.ConeGeometry(1, 3, 30);
 
 export class Airplane {
   constructor(altura, largura, posx, posy, posz, isEnemy) {
-    let material = initBasicMaterial();
     this.altura = altura;
     this.largura = largura;
     this.isEnemy = isEnemy;
 
-    let cubeGeometry = new THREE.BoxGeometry(largura, altura, largura);
-    this.cube = new THREE.Mesh(cubeGeometry, material);
+    let material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+
+    this.cube = new THREE.Mesh(geometry, material);
     this.cube.position.set(posx, posy, posz);
 
     this.vectorPosition = new THREE.Vector3();
     this.vectorPosition.copy(this.cube.position);
-
+    if (!isEnemy) {
+      this.cube.material.color.setHex(0x00ff00);
+      this.cube.rotateX(-89.6);
+    }else 
+      this.cube.rotateX(89.6);
   }
   cube() {
     return this.cube();
@@ -40,41 +47,13 @@ export class Airplane {
   }
 
   shot(scene, tiros) {
-    let tir = new Tiro(
+    let tir = new Projetil(
       this.vectorPosition.x,
       this.vectorPosition.y,
-      this.vectorPosition.z, this.isEnemy
+      this.vectorPosition.z,
+      this.isEnemy
     );
     scene.add(tir.tiro());
     tiros.push(tir);
   }
-
- 
-}
-
-let material = initBasicMaterial();
-let shotGeometry = new THREE.BoxGeometry(0.5, 0.5,0.5);
-
-class Tiro {
-  constructor(posx, posy, posz, isEnemy) {
-
-    this.enemy = isEnemy; 
-    this.shot = new THREE.Mesh(shotGeometry, material);
-    this.shot.position.set(posx, posy, posz);
-    this.vectorPosition = new THREE.Vector3();
-    this.vectorPosition.copy(this.shot.position);
-  }
-  tiro() {
-    return this.shot;
-  }
-
-  moveInZ(qntMove, alpha) {
-    this.vectorPosition.z += qntMove;
-    this.shot.position.lerp(this.vectorPosition, alpha);
-  }
-
-  getVectorPosition() {
-    return this.vectorPosition;
-  }
-  
 }

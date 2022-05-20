@@ -1,20 +1,37 @@
 import * as THREE from  'three';
 import { initBasicMaterial } from "../libs/util/util.js";
 
-export class Projetil{
 
-    constructor(){
-        let material = initBasicMaterial(); 
+const geometry = new THREE.SphereGeometry( 0.2, 32, 16 );
 
-        let cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-        this.cube = new THREE.Mesh(cubeGeometry, material);
-        this.cube.position.set(0,0,0);
-    }
+export class Projetil {
+  constructor(posx, posy, posz, isEnemy) {
 
-    Projetil(){
-        return this.cube;
-    }
-    moving(){
-        this.cube.translateZ(-10);
-    }
+    this.enemy = isEnemy; 
+    let material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+
+    this.shot = new THREE.Mesh( geometry, material );
+    if(!isEnemy)
+        this.shot.material.color.setHex( 0x00ff00);
+    
+
+    this.shot.position.set(posx, posy, posz);
+    this.vectorPosition = new THREE.Vector3();
+    this.vectorPosition.copy(this.shot.position);
+  }
+  tiro() {
+    return this.shot;
+  }
+
+  moveInZ(qntMove, alpha) {
+    this.vectorPosition.z += qntMove;
+    this.shot.position.lerp(this.vectorPosition, alpha);
+  }
+
+  getVectorPosition() {
+    return this.vectorPosition;
+  }
+
+
+  
 }

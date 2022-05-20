@@ -23,12 +23,13 @@ let scene,
   controlsPlane,
   aviao,
   speed,
-  moveSpeedAirplane;
+  moveSpeedAirplane, maxDistanceShot;
 
 //----------------------------- CONFIGS ---------------------------------//
 planeSize = 300; //Tamanho do plano
 speed = 0.1;
 moveSpeedAirplane = 0.4;
+maxDistanceShot = 150;
 
 scene = new THREE.Scene(); // Create main scene
 renderer = initRenderer(); // Init a basic renderer
@@ -42,7 +43,7 @@ createPlanes();
 aviao = new Airplane(0.5, 2, 0, 5, -20, false);
 scene.add(aviao.cube);
 
-let aviao2 = new Airplane(0.5, 2, 0, 5, -40, false);
+let aviao2 = new Airplane(0.5, 2, 0, 5, -40, true);
 scene.add(aviao2.cube);
 let shotsList = [];
 let enemyList = [];
@@ -52,10 +53,10 @@ let enemyList = [];
 limiterPlane = -planeSize;
 controlsPlane = 0;
 
-var helper = new THREE.BoundingBoxHelper(aviao.cube, 0xff0000);
+var helper = new THREE.BoxHelper(aviao.cube);
 helper.update();
 // If you want a visible bounding box
-scene.add(helper);
+//scene.add(helper);
 // If you just want the numbers
  //console.log(helper.box.max);
 // console.log(helper.box.max);
@@ -70,6 +71,8 @@ function keyboardCamera() {
   if (keyboard.pressed("left")) aviao.moveInX(-moveSpeedAirplane, 2*0.005);
   if (keyboard.pressed("right")) aviao.moveInX(moveSpeedAirplane, 2*0.005);
   if (keyboard.down("space")) aviao.shot(scene, shotsList);
+  if (keyboard.down("ctrl")) aviao.shot(scene, shotsList);
+
 }
 
 function runAnimations() {
@@ -85,8 +88,7 @@ function runAnimations() {
 
 function render() {
 
-
-
+  airplanesCollisions()
   runAnimations();
   keyboardCamera();
   requestAnimationFrame(render);
@@ -152,8 +154,9 @@ function updateShot(speed) {
   for (var i = 0; i < shotsList.length; i++) {
     shotsList[i].moveInZ(-speed * 10, 0.1);
 
-    if(detectCollisionCubes(shotsList[i].tiro(), aviao2.cube)){ //! collision ou distancia muito longa
-
+    
+    let distance = aviao.getVectorPosition().distanceTo(shotsList[i].getVectorPosition());
+    if(detectCollisionCubes(shotsList[i].tiro(), aviao2.cube) || distance > maxDistanceShot){ //! collision ou distancia muito longa
 
       removeFromScene(shotsList[i].tiro())
       shotsList.splice(i,1);
@@ -161,6 +164,17 @@ function updateShot(speed) {
 
   }
 }
+
+function airplanesCollisions(){
+
+  //TODO: passar por toda lista de aviões
+  //TODO: Animação de colisão
+  if(detectCollisionCubes(aviao.cube, aviao2.cube)){
+    removeFromScene(aviao2.cube);
+    
+  }
+}
+
 function removeFromScene(obj){
   scene.remove(obj);
 }
@@ -170,11 +184,11 @@ function detectCollisionCubes(object1, object2){
   object1.updateMatrixWorld();
   object2.updateMatrixWorld();
   
-  var box1 = object1.geometry.boundingBox.clone();
+  let box1 = object1.geometry.boundingBox.clone();
   box1.applyMatrix4(object1.matrixWorld);
 
-  var box2 = object2.geometry.boundingBox.clone();
+  let box2 = object2.geometry.boundingBox.clone();
   box2.applyMatrix4(object2.matrixWorld);
-  // console.log(box1.intersectsBox(box2));
+ 
   return box1.intersectsBox(box2);
 }
