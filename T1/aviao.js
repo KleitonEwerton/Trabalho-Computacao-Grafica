@@ -1,11 +1,13 @@
 import * as THREE from "three";
+import { FaceColors } from "../build/three.module.js";
 import { initBasicMaterial } from "../libs/util/util.js";
 
-export class Retangulo {
-  constructor(altura, largura, posx, posy, posz) {
+export class Airplane {
+  constructor(altura, largura, posx, posy, posz, isEnemy) {
     let material = initBasicMaterial();
     this.altura = altura;
     this.largura = largura;
+    this.isEnemy = isEnemy;
 
     let cubeGeometry = new THREE.BoxGeometry(largura, altura, largura);
     this.cube = new THREE.Mesh(cubeGeometry, material);
@@ -14,7 +16,6 @@ export class Retangulo {
     this.vectorPosition = new THREE.Vector3();
     this.vectorPosition.copy(this.cube.position);
 
-    this.tiros = [];
   }
   cube() {
     return this.cube();
@@ -38,32 +39,26 @@ export class Retangulo {
     return this.vectorPosition;
   }
 
-  shot(scene) {
+  shot(scene, tiros) {
     let tir = new Tiro(
-      0.2,
-      0.2,
       this.vectorPosition.x,
       this.vectorPosition.y,
-      this.vectorPosition.z
+      this.vectorPosition.z, this.isEnemy
     );
     scene.add(tir.tiro());
-    this.tiros.push(tir);
+    tiros.push(tir);
   }
 
-  updateShot(speed) {
-    for (var i = 0; i < this.tiros.length; i++) {
-      this.tiros[i].moveInZ(-speed, 0.1);
-    }
-  }
+ 
 }
 
-class Tiro {
-  constructor(altura, largura, posx, posy, posz) {
-    let material = initBasicMaterial();
-    this.altura = altura;
-    this.largura = largura;
+let material = initBasicMaterial();
+let shotGeometry = new THREE.BoxGeometry(0.5, 0.5,0.5);
 
-    let shotGeometry = new THREE.BoxGeometry(largura, altura, largura);
+class Tiro {
+  constructor(posx, posy, posz, isEnemy) {
+
+    this.enemy = isEnemy; 
     this.shot = new THREE.Mesh(shotGeometry, material);
     this.shot.position.set(posx, posy, posz);
     this.vectorPosition = new THREE.Vector3();
@@ -81,4 +76,5 @@ class Tiro {
   getVectorPosition() {
     return this.vectorPosition;
   }
+  
 }
