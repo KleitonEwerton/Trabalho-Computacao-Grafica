@@ -1,20 +1,28 @@
 import * as THREE from "three";
+import { FaceColors } from "../build/three.module.js";
 import { initBasicMaterial } from "../libs/util/util.js";
+import { Projetil } from "./projetil.js";
 
-export class Retangulo {
-  constructor(altura, largura, posx, posy, posz) {
-    let material = initBasicMaterial();
+const geometry = new THREE.ConeGeometry(1, 3, 30);
+
+export class Airplane {
+  constructor(altura, largura, posx, posy, posz, isEnemy) {
     this.altura = altura;
     this.largura = largura;
+    this.isEnemy = isEnemy;
 
-    let cubeGeometry = new THREE.BoxGeometry(largura, altura, largura);
-    this.cube = new THREE.Mesh(cubeGeometry, material);
+    let material = new THREE.MeshLambertMaterial();
+    this.cube = new THREE.Mesh(geometry, material);
     this.cube.position.set(posx, posy, posz);
 
     this.vectorPosition = new THREE.Vector3();
     this.vectorPosition.copy(this.cube.position);
-
-    this.tiros = [];
+    if (!isEnemy) {
+      this.cube.material.color.setHex(0x00ff00);
+      this.cube.rotateX(-89.6);
+    }else {
+      this.cube.material.color.setHex(0xff0000);
+      this.cube.rotateX(89.6);}
   }
   cube() {
     return this.cube();
@@ -38,47 +46,14 @@ export class Retangulo {
     return this.vectorPosition;
   }
 
-  shot(scene) {
-    let tir = new Tiro(
-      0.2,
-      0.2,
+  shot(scene, tiros) {
+    let tir = new Projetil(
       this.vectorPosition.x,
       this.vectorPosition.y,
-      this.vectorPosition.z
+      this.vectorPosition.z,
+      this.isEnemy
     );
     scene.add(tir.tiro());
-    this.tiros.push(tir);
-  }
-
-  updateShot(speed) {
-    for (var i = 0; i < this.tiros.length; i++) {
-      this.tiros[i].moveInZ(-speed, 0.1);
-    }
-  }
-}
-
-class Tiro {
-  constructor(altura, largura, posx, posy, posz) {
-    let material = initBasicMaterial();
-    this.altura = altura;
-    this.largura = largura;
-
-    let shotGeometry = new THREE.BoxGeometry(largura, altura, largura);
-    this.shot = new THREE.Mesh(shotGeometry, material);
-    this.shot.position.set(posx, posy, posz);
-    this.vectorPosition = new THREE.Vector3();
-    this.vectorPosition.copy(this.shot.position);
-  }
-  tiro() {
-    return this.shot;
-  }
-
-  moveInZ(qntMove, alpha) {
-    this.vectorPosition.z += qntMove;
-    this.shot.position.lerp(this.vectorPosition, alpha);
-  }
-
-  getVectorPosition() {
-    return this.vectorPosition;
+    tiros.push(tir);
   }
 }
