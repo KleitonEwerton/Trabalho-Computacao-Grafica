@@ -228,12 +228,8 @@ function gerEnemy(){
 function removeAirplaneOutPlane(){
 
   for(var i = 0; i < enemyList.length;i++){
-    
-    if(!frustum(enemyList[i].getVectorPosition())){
-    removeFromScene(enemyList[i].cube);
-    enemyList.splice(i, 1);}
   
-     
+  
     
    }
 
