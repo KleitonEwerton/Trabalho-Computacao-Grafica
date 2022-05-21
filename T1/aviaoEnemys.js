@@ -1,35 +1,43 @@
 import * as THREE from "three";
-import { FaceColors } from "../build/three.module.js";
-import { initBasicMaterial } from "../libs/util/util.js";
 import { Projetil } from "./projetil.js";
 
-const geometry = new THREE.ConeGeometry(1.5 , 3.5, 30);
-let material = new THREE.MeshLambertMaterial({color: 0x00ff000});
+
+const colors = [
+
+    {'color':'0xff0000', 'sub-color':'0xff3232'},
+    {'color':'0x0000ff', 'sub-color':'0x3232ff'},
+
+]
+
+const geometry = new THREE.BoxGeometry(4 , 2, 4);
 
 
-export class Airplane {
+export class AirplaneEnemy {
   constructor(altura, largura, posx, posy, posz, speed,isEnemy) {
+
     this.altura = altura;
     this.largura = largura;
     this.isEnemy = isEnemy;
     this.speed = speed;
 
+    let material = new THREE.MeshLambertMaterial({color: 0xff0000});
     this.cube = new THREE.Mesh(geometry, material);
     this.cube.position.set(posx, posy, posz);
 
     this.vectorPosition = new THREE.Vector3();
     this.vectorPosition.copy(this.cube.position);
-    
-   
-    this.cube.rotateX(-89.6);
-    
+    //Numero da cor do aviao
+    this.numerColor = Math.floor(Math.random() * colors.length);
+    //Muda a cor do aviao
+    this.cube.material.color.setHex(colors[this.numerColor]["color"]);
+
   }
   cube() {
     return this.cube();
   }
 
   moveInX(qntMove) {
-    this.vectorPosition.x +=  1.5 * qntMove;
+    this.vectorPosition.x +=  1.2 * qntMove;
     this.cube.position.lerp(this.vectorPosition,4 * this.speed);
   }
 
@@ -41,9 +49,9 @@ export class Airplane {
     this.vectorPosition.z += qntMove;
     this.cube.position.lerp(this.vectorPosition,this.speed);
   }
-  moveInZContinuo(qntMove, alpha) {
+  moveInZContinuo(qntMove) {
     this.vectorPosition.z += qntMove;
-    this.cube.position.lerp(this.vectorPosition,alpha);
+    this.cube.position.lerp(this.vectorPosition,this.speed);
   }
 
   getVectorPosition() {
@@ -51,6 +59,7 @@ export class Airplane {
   }
 
   shot(scene, tiros) {
+
     let tir = new Projetil(
       this.vectorPosition.x,
       this.vectorPosition.y ,
@@ -61,11 +70,7 @@ export class Airplane {
     tiros.push(tir);
   }
 
-  atingido(){
-  
-      this.cube.material.color.setHex(0x32ff32);
-      setTimeout(function() { material.color.setHex(0x00ff00);}, 500);
-    
+  changeColor(){
+    this.cube.material.color.setHex(colors[this.numerColor]['sub-color']);
   }
-  
 }

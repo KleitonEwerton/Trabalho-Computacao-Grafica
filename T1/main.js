@@ -10,6 +10,7 @@ import {
   initDefaultBasicLight,
 } from "../libs/util/util.js";
 
+import { AirplaneEnemy } from "./aviaoEnemys.js";
 import { Airplane } from "./aviao.js";
 
 let keyboard = new KeyboardState();
@@ -25,79 +26,128 @@ let scene,
   controlsPlane,
   aviao,
   speed,
-  moveSpeedAirplane, 
-  maxDistanceShot,
-  camCreat;
+  moveSpeedAirplane,
+  maxDistanceShot;
 
-//----------------------------- CONFIGS ---------------------------------//
-planeSize = 300; //Tamanho do plano
+//----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
+planeSize = 450; //Tamanho do plano
 speed = 0.1;
 moveSpeedAirplane = 0.4;
 maxDistanceShot = 150;
-camCreat = true;
+//------------------------------------------------------------------------------------//
 
-let tempo = -40;
 scene = new THREE.Scene(); // Create main scene
 renderer = initRenderer(); // Init a basic renderer
-
-scene.add(new THREE.HemisphereLight()); //Luz
+initDefaultBasicLight(scene); // Luz
 
 configCamera();
 
 createPlanes();
 
-aviao = new Airplane(0.5, 2, 0, 5, -20, false);
+aviao = new Airplane(0.5, 2, 0, 5, -20, 0.005, false);
 scene.add(aviao.cube);
-
-initDefaultBasicLight(scene); // Luz
 
 let shotsList = [];
 let enemyList = [];
 
-
-//Configurações de controle do plano
-limiterPlane = -planeSize;
-controlsPlane = 0;
-
-var helper = new THREE.BoxHelper(aviao.cube);
-helper.update();
-
 render();
 
+//----------------------- Controles ----------------------------------
 function keyboardCamera() {
   keyboard.update();
 
-  if (keyboard.pressed("up")) aviao.moveInZ(-moveSpeedAirplane, 0.005);
-  if (keyboard.pressed("down")) aviao.moveInZ(moveSpeedAirplane, 0.005);
-  if (keyboard.pressed("left")) aviao.moveInX(-moveSpeedAirplane, 2*0.005);
-  if (keyboard.pressed("right")) aviao.moveInX(moveSpeedAirplane, 2*0.005);
+  if (keyboard.pressed("up")) aviao.moveInZ(-moveSpeedAirplane);
+  if (keyboard.pressed("down")) aviao.moveInZ(moveSpeedAirplane);
+  if (keyboard.pressed("left")) aviao.moveInX(-moveSpeedAirplane);
+  if (keyboard.pressed("right")) aviao.moveInX(moveSpeedAirplane);
   if (keyboard.down("space")) aviao.shot(scene, shotsList);
   if (keyboard.down("ctrl")) aviao.shot(scene, shotsList);
+}
+//---------------------------------------------------------------------
 
+
+
+//------------------------ Remoções ---------------------------
+
+
+function removeShotsCollisionsAndOutPlane() {
+  for (var i = 0; i < shotsList.length; i++) {
+    //Calcula a distancia do tiro do aviao para remover
+    let distance = aviao
+      .getVectorPosition()
+      .distanceTo(shotsList[i].getVectorPosition());
+
+    for (var j = 0; j < enemyList.length; j++) {
+      if (detectCollisionCubes(shotsList[i].tiro(), enemyList[j].cube)) {
+        //Se colidir  com o inimigo remove os dois
+        removeFromScene(shotsList[i].tiro(), 0); //Remove tiro da cena
+        shotsList.splice(i, 1); //Remove tiro do vetor
+
+        enemyList[j].changeColor(); //Altera a cor: animação
+        removeFromScene(enemyList[j].cube, 0.5); //Remove da cena apos 0.5 segundos
+        enemyList.splice(j, 1); //Remove do vetor
+
+        break;
+      }
+    }
+    if (distance > maxDistanceShot) {
+      //Remove o tiro se ele esta longe do jogador: fora da tela
+      removeFromScene(shotsList[i].tiro(), 0);
+      shotsList.splice(i, 1);
+    }
+  }
 }
 
-function runAnimations() {
-  updateShot(2 * speed);
-  cameraHolder.translateZ(-speed);
-  aviao.moveInZ(-speed, 1); //Atualzia a posição do aviao
+function removeAirplaneCollision() {
+  for (var i = 0; i < enemyList.length; i++)
+    if (detectCollisionCubes(aviao.cube, enemyList[i].cube)) {
+      //verifica a colisão dos aviões e remove o inimigo
+      aviao.atingido();
+      enemyList[i].changeColor();
+      removeFromScene(enemyList[i].cube, 0.5);
+      enemyList.splice(i, 1);
+    }
+}
+
+function removeAirplaneOutPlane() {
+  for (var i = 0; i < enemyList.length; i++) {
+    if (enemyList[i].cube.position.z > cameraHolder.position.z) {
+      // remove o inimigo que já não está mais visivel
+      removeFromScene(enemyList[i].cube, 0);
+      enemyList.splice(i, 1);
+    }
+  }
+}
+
+function removeFromScene(obj, timeSegundos) {
+  setTimeout(function () {
+    scene.remove(obj);
+  }, timeSegundos * 1000); // funcao que remove da cena com uma animação
+}
+//----------------------------------------------------------------------
+
+//------------------------------ Updates ------------------------------------
+
+function updateShots() {
+  for (var i = 0; i < shotsList.length; i++)
+    shotsList[i].moveInZ(-speed * 20, 0.1);
+}
+function updateAllEnemys() {
+  for (var i = 0; i < enemyList.length; i++) enemyList[i].moveInZContinuo(-5);
+}
+
+function updateAnimations() {
+  updateAllEnemys();
+  updateShots();
   renderInfinityPlane();
-  helper.update();// !IMPORTANT ATUALIZA O BOX
+  cameraHolder.translateZ(-speed);
+  aviao.moveInZContinuo(-speed, 1);
 }
 
-function render() {
+//------------------------------------------------------------------------
 
-  airplanesCollisions()
-  runAnimations();
-  keyboardCamera();
-  requestAnimationFrame(render);
-  renderer.render(scene, camera); // Render scene
-  gerEnemy();
-  removeAirplaneOutPlane();
-  
+//----------------------------RENDER------------------------
 
-}
-
-// Renderiza o plano infinitamente
 function renderInfinityPlane() {
   if (cameraHolder.position.z < limiterPlane) {
     limiterPlane += -planeSize;
@@ -109,13 +159,28 @@ function renderInfinityPlane() {
   }
 }
 
+function render() {
+  gerEnemy();
+  removeAirplaneCollision();
+  updateAnimations();
+  keyboardCamera();
+  removeShotsCollisionsAndOutPlane();
+  requestAnimationFrame(render);
+  renderer.render(scene, camera);
+  removeAirplaneOutPlane();
+}
+
+//--------------------Configs-----------------------------------
+
 function configCamera() {
+  //Cria a camera
   camera = new THREE.PerspectiveCamera(
     70,
     window.innerWidth / window.innerHeight,
-    0.1,
+    0.2,
     1000
   );
+  //configura a camera
   camera.position.set(0, 0, 1);
   camera.up.set(0, 0, 0);
   camera.lookAt(0, 0, 0);
@@ -130,107 +195,64 @@ function configCamera() {
     false
   );
 
-  //camera position
+  //Congigurações da camera holder
   cameraHolder = new THREE.Object3D();
-
   cameraHolder.add(camera);
-
-  cameraHolder.position.set(0, 20, 0);
-
+  cameraHolder.position.set(0, 30, 0);
   scene.add(cameraHolder);
 }
 
 function createPlanes() {
-  // create the ground plane
+  //Criar plano
   plane = createGroundPlaneWired(planeSize, planeSize, 50, 50);
   plane2 = createGroundPlaneWired(planeSize, planeSize, 50, 50);
-
+  //Add plano na cena
   scene.add(plane);
   scene.add(plane2);
-
+  //Set a posição do plano
   plane.position.z = 0;
   plane2.position.z = -planeSize;
+
+  //Configurações de controle do plano
+  limiterPlane = -planeSize;
+  controlsPlane = 0;
 }
+//--------------------------------------------------------
 
-function updateShot(speed) {
-  for (var i = 0; i < shotsList.length; i++) {
-    shotsList[i].moveInZ(-speed * 10, 0.1);
+//----------------------- Outros -------------------------
 
-    
-    let distance = aviao.getVectorPosition().distanceTo(shotsList[i].getVectorPosition());
-
-    for(var j=0; j<enemyList.length; j++) {
-
-      if(detectCollisionCubes(shotsList[i].tiro(), enemyList[j].cube) ){ //! collision ou distancia muito longa
-
-        removeFromScene(shotsList[i].tiro());
-        shotsList.splice(i,1);
-        removeFromScene(enemyList[j].cube);
-        enemyList.splice(j, 1);
-        break;
-      }
-
-    }
-    if(distance > maxDistanceShot){
-
-      removeFromScene(shotsList[i].tiro());
-      shotsList.splice(i,1);
-
-    }
-
-    
-
-  }
-}
-
-function airplanesCollisions(){
-
-  //TODO: passar por toda lista de aviões
-  //TODO: Animação de colisão
-  for(var i = 0;i< enemyList.length; i++)
-    if(detectCollisionCubes(aviao.cube, enemyList[i].cube)){
-    removeFromScene(enemyList[i].cube);
-    enemyList.splice(i,1);
-  }
-}
-
-function removeFromScene(obj){
-  scene.remove(obj);
-}
-function detectCollisionCubes(object1, object2){
-
-  object1.geometry.computeBoundingBox(); //not needed if its already calculated
+function detectCollisionCubes(object1, object2) {
+  object1.geometry.computeBoundingBox();
   object2.geometry.computeBoundingBox();
   object1.updateMatrixWorld();
   object2.updateMatrixWorld();
-  
+
   let box1 = object1.geometry.boundingBox.clone();
   box1.applyMatrix4(object1.matrixWorld);
 
   let box2 = object2.geometry.boundingBox.clone();
   box2.applyMatrix4(object2.matrixWorld);
- 
+
   return box1.intersectsBox(box2);
 }
 
-function gerEnemy(){
-
-  if(enemyList.length <5 && camCreat){
-    
-    enemyList.push(new Airplane(0.5, 2, -40 + Math.floor(Math.random() * 81), 5, tempo, true));
-    tempo -= 10;
- 
+function gerEnemy() {
+  // Numero maximo de inimigos: 6
+  if (enemyList.length < 6) {
+    //ADD novo avião lista de inimigos ainda vivos
+    enemyList.push(
+      new AirplaneEnemy(
+        0.5,
+        2,
+        -50 + Math.floor(Math.random() * 91), //valor da coordenada x. minimo: -50 maximo 50
+        5,
+        aviao.getVectorPosition().z - (80 + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: 80 maxima: 90
+        Math.random() * (0.0001 - 0.0004),
+        true
+      )
+    );
   }
-  for(var i = 0; i < enemyList.length; i++)
-    scene.add(enemyList[i].cube);
+  for (var i = 0; i < enemyList.length; i++) scene.add(enemyList[i].cube); // add inimigos na cena
 }
 
-function removeAirplaneOutPlane(){
-
-  for(var i = 0; i < enemyList.length;i++){
-  
-  
-    
-   }
-
-}
+//---------------------------------------------------------
