@@ -5,15 +5,13 @@ import { initBasicMaterial } from "../libs/util/util.js";
 const geometry = new THREE.SphereGeometry( 0.6, 32, 16 );
 let material = new THREE.MeshLambertMaterial();
 export class Projetil {
-  constructor(posx, posy, posz, isEnemy) {
+  constructor(posx, posy, posz, isEnemy, hexColor) {
 
     this.enemy = isEnemy; 
    
     this.shot = new THREE.Mesh( geometry, material );
-    if(!isEnemy)
-        this.shot.material.color.setHex( 0x00ff00);
-    else 
-      this.shot.material.color.setHex( 0xff0000);
+    
+    this.shot.material.color.setHex( hexColor);
 
     this.shot.position.set(posx, posy, posz);
     this.vectorPosition = new THREE.Vector3();

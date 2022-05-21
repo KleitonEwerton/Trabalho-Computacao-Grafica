@@ -10,8 +10,8 @@ import {
   initDefaultBasicLight,
 } from "../libs/util/util.js";
 
-import { AirplaneEnemy } from "./aviaoEnemys.js";
-import { Airplane } from "./aviao.js";
+import { AirplaneEnemy } from "./airplaneEnemy.js";
+import { AirplanePlayer } from "./airplanePlayer.js";
 
 let keyboard = new KeyboardState();
 
@@ -24,7 +24,7 @@ let scene,
   planeSize,
   limiterPlane,
   controlsPlane,
-  aviao,
+  player,
   speed,
   moveSpeedAirplane,
   maxDistanceShot;
@@ -44,8 +44,8 @@ configCamera();
 
 createPlanes();
 
-aviao = new Airplane(0.5, 2, 0, 5, -20, 0.005, false);
-scene.add(aviao.cube);
+player = new AirplanePlayer(0.5, 2, 0, 5, -20, 0.005, false);
+scene.add(player.cone);
 
 let shotsList = [];
 let enemyList = [];
@@ -56,12 +56,12 @@ render();
 function keyboardCamera() {
   keyboard.update();
 
-  if (keyboard.pressed("up")) aviao.moveInZ(-moveSpeedAirplane);
-  if (keyboard.pressed("down")) aviao.moveInZ(moveSpeedAirplane);
-  if (keyboard.pressed("left")) aviao.moveInX(-moveSpeedAirplane);
-  if (keyboard.pressed("right")) aviao.moveInX(moveSpeedAirplane);
-  if (keyboard.down("space")) aviao.shot(scene, shotsList);
-  if (keyboard.down("ctrl")) aviao.shot(scene, shotsList);
+  if (keyboard.pressed("up")) player.moveInZ(-moveSpeedAirplane);
+  if (keyboard.pressed("down")) player.moveInZ(moveSpeedAirplane);
+  if (keyboard.pressed("left")) player.moveInX(-moveSpeedAirplane);
+  if (keyboard.pressed("right")) player.moveInX(moveSpeedAirplane);
+  if (keyboard.down("space")) player.shot(scene, shotsList);
+  if (keyboard.down("ctrl")) player.shot(scene, shotsList);
 }
 //---------------------------------------------------------------------
 
@@ -72,8 +72,8 @@ function keyboardCamera() {
 
 function removeShotsCollisionsAndOutPlane() {
   for (var i = 0; i < shotsList.length; i++) {
-    //Calcula a distancia do tiro do aviao para remover
-    let distance = aviao
+    //Calcula a distancia do tiro do player para remover
+    let distance = player
       .getVectorPosition()
       .distanceTo(shotsList[i].getVectorPosition());
 
@@ -100,9 +100,9 @@ function removeShotsCollisionsAndOutPlane() {
 
 function removeAirplaneCollision() {
   for (var i = 0; i < enemyList.length; i++)
-    if (detectCollisionCubes(aviao.cube, enemyList[i].cube)) {
+    if (detectCollisionCubes(player.cone, enemyList[i].cube)) {
       //verifica a colisão dos aviões e remove o inimigo
-      aviao.atingido();
+      player.atingido();
       enemyList[i].changeColor();
       removeFromScene(enemyList[i].cube, 0.5);
       enemyList.splice(i, 1);
@@ -141,7 +141,7 @@ function updateAnimations() {
   updateShots();
   renderInfinityPlane();
   cameraHolder.translateZ(-speed);
-  aviao.moveInZContinuo(-speed, 1);
+  player.moveInZContinuo(-speed, 1);
 }
 
 //------------------------------------------------------------------------
@@ -244,9 +244,9 @@ function gerEnemy() {
       new AirplaneEnemy(
         0.5,
         2,
-        -50 + Math.floor(Math.random() * 91), //valor da coordenada x. minimo: -50 maximo 50
+        -60 + Math.floor(Math.random() * 101), //valor da coordenada x. minimo: -60 maximo 60
         5,
-        aviao.getVectorPosition().z - (80 + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: 80 maxima: 90
+        player.getVectorPosition().z - (80 + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: 80 maxima: 90
         Math.random() * (0.0001 - 0.0004),
         true
       )
