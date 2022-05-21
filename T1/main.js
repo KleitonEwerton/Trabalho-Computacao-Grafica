@@ -56,10 +56,31 @@ render();
 function keyboardCamera() {
   keyboard.update();
 
-  if (keyboard.pressed("up")) player.moveInZ(-moveSpeedAirplane);
-  if (keyboard.pressed("down")) player.moveInZ(moveSpeedAirplane);
-  if (keyboard.pressed("left")) player.moveInX(-moveSpeedAirplane);
-  if (keyboard.pressed("right")) player.moveInX(moveSpeedAirplane);
+  const frustum = new THREE.Frustum();
+  const matrix = new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+  frustum.setFromProjectionMatrix(matrix);
+
+  let position1 = new THREE.Vector3();
+  position1.setFromMatrixPosition(player.cone.matrixWorld);
+
+  if (keyboard.pressed("up")) {
+    position1.z -= moveSpeedAirplane;
+    if (frustum.containsPoint(position1)) player.moveInZ(-moveSpeedAirplane);
+  }
+  if (keyboard.pressed("down")) {
+    position1.z += moveSpeedAirplane;
+    if (frustum.containsPoint(position1)) player.moveInZ(moveSpeedAirplane);
+  }
+  if (keyboard.pressed("left")) {
+    //position1.x -= moveSpeedAirplane;
+    position1.x -= 0.8;
+    if (frustum.containsPoint(position1)) player.moveInX(-moveSpeedAirplane);
+  }
+  if (keyboard.pressed("right")) {
+    //position1.x += moveSpeedAirplane;
+    position1.x += 0.8;
+    if (frustum.containsPoint(position1)) player.moveInX(moveSpeedAirplane);
+  }
   if (keyboard.down("space")) player.shot(scene, shotsList);
   if (keyboard.down("ctrl")) player.shot(scene, shotsList);
 }
