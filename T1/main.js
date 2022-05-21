@@ -85,51 +85,9 @@ function keyboardCamera() {
 
 function runAnimations() {
   cameraHolder.translateZ(-0.4);
-  //console.log(cameraHolder.position, aviao.getVectorPosition());
-  //console.log("1: " + plane.position.z);
-  //console.log("2 :" + plane2.position.z);
-  projeteis();
   aviao.moveInZ(-0.4, 1);
   renderInfinityPlane();
 }
-
-function projeteis() {
-  const frustum = new THREE.Frustum();
-  const matrix = new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-  frustum.setFromProjectionMatrix(matrix);
-
-  //console.log(matrix.getMaxScaleOnAxis());
-
-  //console.log(p1.getVectorPosition());
-  if (!frustum.containsPoint(p1.getVectorPosition())) {
-
-    // console.log("1: " + plane.position.z);
-    // console.log("2: " + plane2.position.z);
-    //  console.log("3: " + cameraHolder.position.z);
-    //  console.log("a: "+aviao.cube.position.z);
-
-    if (plane.position.z < plane2.position.z) {
-      //var plano = plane.position.z - 100;
-      //console.log(plano);
-      // var Z1 = getRandomArbitrary(plane.position.z, aviao.cube.position.z);
-      var Z1 = plane.position.z;
-      
-    }
-    else {
-      // var Z1 = getRandomArbitrary(plane2.position.z, aviao.cube.position.z);
-      var Z1 = plane2.position.z;
-    }
-    var X1 = getRandomArbitrary(-10, 10);
-    //console.log(Z1);
-
-    scene.remove(p1.cube);
-    p1 = new Retangulo(0.5, 2, X1, 5, Z1);
-    //console.log("OI");
-    scene.add(p1.cube);
-    p1.moveInZ(-0.8, 1);
-  }
-}
-
 
 function render() {
   runAnimations();
@@ -148,10 +106,6 @@ function renderInfinityPlane() {
 
     controlsPlane += 1;
   }
-}
-
-function getRandomArbitrary(min, max) {
-  return Math.random() * (max - min) + min;
 }
 
 function configCamera() {
