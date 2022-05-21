@@ -64,25 +64,22 @@ function keyboardCamera() {
   if (keyboard.pressed("up")) {
     position1.z -= 0.2;
     if (frustum.containsPoint(position1)) aviao.moveInZ(-0.2, 0.001);
-      else aviao.moveInZ(0.2, 0.001);
+      //else aviao.moveInZ(0.2, 0.001);
   }
   if (keyboard.pressed("down")) {
     position1.z += 0.2;
-    
     if (frustum.containsPoint(position1)) aviao.moveInZ(0.2, 0.001);
-    else aviao.moveInZ(-0.2, 0.001);
+    //else aviao.moveInZ(-0.2, 0.001);
   }
   if (keyboard.pressed("left")) {
     position1.x -= 0.2;
-    
     if (frustum.containsPoint(position1)) aviao.moveInX(-0.2, 0.001);
-    else aviao.moveInX(0.2, 0.001);
+    //else aviao.moveInX(0.2, 0.001);
   }
   if (keyboard.pressed("right")) {
     position1.x += 0.2;
-    
     if (frustum.containsPoint(position1)) aviao.moveInX(0.2, 0.001);
-    else aviao.moveInX(-0.2, 0.001);
+    //else aviao.moveInX(-0.2, 0.001);
   }
 }
 
