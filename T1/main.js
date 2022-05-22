@@ -30,7 +30,7 @@ let scene,
   maxDistanceShot;
 
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
-planeSize = 450; //Tamanho do plano
+planeSize = 500; //Tamanho do plano
 speed = 0.1;
 moveSpeedAirplane = 0.4;
 maxDistanceShot = 150;
@@ -39,7 +39,6 @@ maxDistanceShot = 150;
 scene = new THREE.Scene(); // Create main scene
 renderer = initRenderer(); // Init a basic renderer
 initDefaultBasicLight(scene); // Luz
-
 configCamera();
 
 createPlanes();
@@ -57,7 +56,10 @@ function keyboardCamera() {
   keyboard.update();
 
   const frustum = new THREE.Frustum();
-  const matrix = new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+  const matrix = new THREE.Matrix4().multiplyMatrices(
+    camera.projectionMatrix,
+    camera.matrixWorldInverse
+  );
   frustum.setFromProjectionMatrix(matrix);
 
   let position1 = new THREE.Vector3();
@@ -86,10 +88,7 @@ function keyboardCamera() {
 }
 //---------------------------------------------------------------------
 
-
-
 //------------------------ Remoções ---------------------------
-
 
 function removeShotsCollisionsAndOutPlane() {
   for (var i = 0; i < shotsList.length; i++) {

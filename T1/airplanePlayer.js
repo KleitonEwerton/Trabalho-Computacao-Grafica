@@ -55,9 +55,9 @@ export class AirplanePlayer {
   }
 
   atingido() {
-    this.cone.material.color.setHex(0x32ff32);
+    this.cone.material.color.setHex(0xff4c4c);
     setTimeout(function () {
-      material.color.setHex(0x00ff00);
+      material.color.setHex(0x32ff32);
     }, 500);
   }
 }
