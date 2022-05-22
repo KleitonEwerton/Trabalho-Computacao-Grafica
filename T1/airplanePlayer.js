@@ -42,6 +42,12 @@ export class AirplanePlayer {
     return this.vectorPosition;
   }
 
+  setPosition(posInitPlayerX,posInitPlayerY, posInitPlayerZ) { 
+    this.cone.position.set(posInitPlayerX,posInitPlayerY, posInitPlayerZ);
+    this.vectorPosition.copy(this.cone.position);
+  }
+
+
   shot(scene, tiros) {
     let tir = new Projetil(
       this.vectorPosition.x,
