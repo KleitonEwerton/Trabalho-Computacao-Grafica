@@ -66,20 +66,18 @@ function keyboardCamera() {
   position1.setFromMatrixPosition(player.cone.matrixWorld);
 
   if (keyboard.pressed("up")) {
-    position1.z -= moveSpeedAirplane;
+    position1.z -= 2.5;
     if (frustum.containsPoint(position1)) player.moveInZ(-moveSpeedAirplane);
   }
   if (keyboard.pressed("down")) {
-    position1.z += moveSpeedAirplane;
+    position1.z += 2.5;
     if (frustum.containsPoint(position1)) player.moveInZ(moveSpeedAirplane);
   }
   if (keyboard.pressed("left")) {
-    //position1.x -= moveSpeedAirplane;
     position1.x -= 0.8;
     if (frustum.containsPoint(position1)) player.moveInX(-moveSpeedAirplane);
   }
   if (keyboard.pressed("right")) {
-    //position1.x += moveSpeedAirplane;
     position1.x += 0.8;
     if (frustum.containsPoint(position1)) player.moveInX(moveSpeedAirplane);
   }

@@ -24,12 +24,12 @@ export class AirplanePlayer {
   }
 
   moveInX(qntMove) {
-    this.vectorPosition.x += 1.8 * qntMove;
-    this.cone.position.lerp(this.vectorPosition, 4 * this.speed);
+    this.vectorPosition.x += 1.9 * qntMove;
+    this.cone.position.lerp(this.vectorPosition, 5 * this.speed);
   }
 
   moveInZ(qntMove) {
-    this.vectorPosition.z += qntMove;
+    this.vectorPosition.z += 1.4*qntMove;
     this.cone.position.lerp(this.vectorPosition, this.speed);
   }
 
