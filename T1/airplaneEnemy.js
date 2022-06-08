@@ -72,4 +72,8 @@ export class AirplaneEnemy {
   changeColor() {
     this.cube.material.color.setHex(colors[this.numerColor]["sub-color"]);
   }
+  rotate(){
+    for (let i = 0; i < 10;i += 0.001)
+      this.cube.rotateY(THREE.Math.degToRad(i));
+  }
 }
