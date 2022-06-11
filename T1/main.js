@@ -27,13 +27,21 @@ let scene,
   player,
   speed,
   moveSpeedAirplane,
-  maxDistanceShot;
+  maxDistanceShot,
+  posInitPlayerX,
+  posInitPlayerY,
+  posInitPlayerZ,
+  start;
 
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
 planeSize = 500; //Tamanho do plano
 speed = 0.1;
 moveSpeedAirplane = 0.4;
 maxDistanceShot = 150;
+posInitPlayerX = 0;
+posInitPlayerY = 5;
+posInitPlayerZ = -20;
+start = true;
 //------------------------------------------------------------------------------------//
 
 scene = new THREE.Scene(); // Create main scene
@@ -43,7 +51,8 @@ configCamera();
 
 createPlanes();
 
-player = new AirplanePlayer(0.5, 2, 0, 5, -20, 0.005, false);
+createPlayer();
+
 scene.add(player.cone);
 
 let shotsList = [];
@@ -65,24 +74,27 @@ function keyboardCamera() {
   let position1 = new THREE.Vector3();
   position1.setFromMatrixPosition(player.cone.matrixWorld);
 
-  if (keyboard.pressed("up")) {
-    position1.z -= 2.5;
-    if (frustum.containsPoint(position1)) player.moveInZ(-moveSpeedAirplane);
+  if (start) {
+    if (keyboard.pressed("up")) {
+      position1.z -= 2.5;
+      if (frustum.containsPoint(position1)) player.moveInZ(-moveSpeedAirplane);
+    }
+    if (keyboard.pressed("down")) {
+      position1.z += 2.5;
+      if (frustum.containsPoint(position1)) player.moveInZ(moveSpeedAirplane);
+    }
+    if (keyboard.pressed("left")) {
+      position1.x -= 0.8;
+      if (frustum.containsPoint(position1)) player.moveInX(-moveSpeedAirplane);
+    }
+    if (keyboard.pressed("right")) {
+      position1.x += 0.8;
+      if (frustum.containsPoint(position1)) player.moveInX(moveSpeedAirplane);
+    }
+    if (keyboard.down("space")) player.shot(scene, shotsList);
+
+    if (keyboard.down("ctrl")) player.shot(scene, shotsList);
   }
-  if (keyboard.pressed("down")) {
-    position1.z += 2.5;
-    if (frustum.containsPoint(position1)) player.moveInZ(moveSpeedAirplane);
-  }
-  if (keyboard.pressed("left")) {
-    position1.x -= 0.8;
-    if (frustum.containsPoint(position1)) player.moveInX(-moveSpeedAirplane);
-  }
-  if (keyboard.pressed("right")) {
-    position1.x += 0.8;
-    if (frustum.containsPoint(position1)) player.moveInX(moveSpeedAirplane);
-  }
-  if (keyboard.down("space")) player.shot(scene, shotsList);
-  if (keyboard.down("ctrl")) player.shot(scene, shotsList);
 }
 //---------------------------------------------------------------------
 
@@ -102,6 +114,7 @@ function removeShotsCollisionsAndOutPlane() {
         shotsList.splice(i, 1); //Remove tiro do vetor
 
         enemyList[j].changeColor(); //Altera a cor: animação
+        enemyList[j].rotate();
         removeFromScene(enemyList[j].cube, 0.5); //Remove da cena apos 0.5 segundos
         enemyList.splice(j, 1); //Remove do vetor
 
@@ -117,13 +130,10 @@ function removeShotsCollisionsAndOutPlane() {
 }
 
 function removeAirplaneCollision() {
+  
   for (var i = 0; i < enemyList.length; i++)
     if (detectCollisionCubes(player.cone, enemyList[i].cube)) {
-      //verifica a colisão dos aviões e remove o inimigo
-      player.atingido();
-      enemyList[i].changeColor();
-      removeFromScene(enemyList[i].cube, 0.5);
-      enemyList.splice(i, 1);
+      restart();
     }
 }
 
@@ -178,14 +188,16 @@ function renderInfinityPlane() {
 }
 
 function render() {
-  gerEnemy();
-  removeAirplaneCollision();
-  updateAnimations();
+  if (start) {
+    updateAnimations();
+    gerEnemy();
+    removeAirplaneCollision();
+  }
   keyboardCamera();
   removeShotsCollisionsAndOutPlane();
   requestAnimationFrame(render);
-  renderer.render(scene, camera);
   removeAirplaneOutPlane();
+  renderer.render(scene, camera);
 }
 
 //--------------------Configs-----------------------------------
@@ -264,7 +276,7 @@ function gerEnemy() {
         2,
         -60 + Math.floor(Math.random() * 101), //valor da coordenada x. minimo: -60 maximo 60
         5,
-        player.getVectorPosition().z - (80 + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: 80 maxima: 90
+        player.getVectorPosition().z - (90 + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: 90 maxima: 100
         Math.random() * (0.0001 - 0.0004),
         true
       )
@@ -274,3 +286,32 @@ function gerEnemy() {
 }
 
 //---------------------------------------------------------
+function restart() {
+  start = false;
+  player.atingido();
+  setTimeout(function () {
+    for (var i = 0; i < enemyList.length; i++)
+      removeFromScene(enemyList[i].cube, 0); //Remove da cena
+
+    enemyList.splice(0, enemyList.length); // Remove lista
+    plane.position.z = 0; //Reseta os planos
+    plane2.position.z = -planeSize;
+    cameraHolder.position.z = 0; //Reseta a camera
+    player.setPosition(posInitPlayerX, posInitPlayerY, posInitPlayerZ); //Reseta o player
+
+    start = true;
+    player.rotate();
+  }, 1000);
+}
+
+function createPlayer() {
+  player = new AirplanePlayer(
+    0.5,
+    2,
+    posInitPlayerX,
+    posInitPlayerY,
+    posInitPlayerZ,
+    0.005,
+    false
+  );
+}

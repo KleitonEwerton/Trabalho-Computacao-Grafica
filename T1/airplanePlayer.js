@@ -29,7 +29,7 @@ export class AirplanePlayer {
   }
 
   moveInZ(qntMove) {
-    this.vectorPosition.z += 1.4*qntMove;
+    this.vectorPosition.z += 1.4 * qntMove;
     this.cone.position.lerp(this.vectorPosition, this.speed);
   }
 
@@ -42,11 +42,16 @@ export class AirplanePlayer {
     return this.vectorPosition;
   }
 
+  setPosition(posInitPlayerX, posInitPlayerY, posInitPlayerZ) {
+    this.cone.position.set(posInitPlayerX, posInitPlayerY, posInitPlayerZ);
+    this.vectorPosition.copy(this.cone.position);
+  }
+
   shot(scene, tiros) {
     let tir = new Projetil(
       this.vectorPosition.x,
       this.vectorPosition.y,
-      this.vectorPosition.z-2,
+      this.vectorPosition.z - 2,
       this.isEnemy,
       this.color
     );
@@ -56,8 +61,14 @@ export class AirplanePlayer {
 
   atingido() {
     this.cone.material.color.setHex(0xff4c4c);
+    this.rotate();
     setTimeout(function () {
+
       material.color.setHex(0x32ff32);
-    }, 500);
+      
+    }, 1000);
+  }
+  rotate(){
+    for(let i = 0; i<360;i+= 0.01)this.cone.rotateZ(THREE.Math.degToRad(i));
   }
 }
