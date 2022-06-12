@@ -2,30 +2,25 @@ import * as THREE from "three";
 import { Projetil } from "./projetil.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 
-const geometry = new THREE.ConeGeometry(1.5, 3.5, 30);
+const geometry = new THREE.ConeGeometry(2, 8, 30);
 let material = new THREE.MeshLambertMaterial({ color: 0x00ff000 });
 let loader = new GLTFLoader();
-export var objs = [];
 
 export class AirplanePlayer {
-  constructor(altura, largura, posx, posy, posz, speed, scene) {
-    this.altura = altura;
-    this.largura = largura;
+  constructor(posx, posy, posz, speed, scene) {
     this.speed = speed;
-    
 
     const afterload = (object) => {
       this.obj = object;
       scene.add(this.obj);
     };
 
-    returnFBX("./assets/u.glb");
+    returnFBX("./assets/player.glb");
     function returnFBX(PATH) {
       loader.load(PATH, function (object) {
         object.scene.position.set(0, 5, -20);
-        object.scene.scale.set(0.5,0.5,0.5);
-        object.scene.rotateY(-1.55);
-        object.scene.rotateZ(0.2);
+        object.scene.scale.set(0.5, 0.5, 0.5);
+        object.scene.rotateY((3 * Math.PI) / 2);
 
         afterload(object.scene);
       });
@@ -33,10 +28,12 @@ export class AirplanePlayer {
 
     this.cone = new THREE.Mesh(geometry, material);
     this.cone.position.set(posx, posy, posz);
-
+    this.cone.rotateX(3*Math.PI/2 );
     this.vectorPosition = new THREE.Vector3();
     this.vectorPosition.copy(this.cone.position);
-    this.cone.rotateX(-89.6);
+
+    
+    // scene.add(this.cone);  //! Para ver o cone retire o comentário dessa linha
   }
   cone() {
     return this.cone;
@@ -50,13 +47,15 @@ export class AirplanePlayer {
   moveInZ(qntMove) {
     this.vectorPosition.z += 1.4 * qntMove;
     this.cone.position.lerp(this.vectorPosition, this.speed);
+    if (this.obj != undefined)
+      this.obj.position.lerp(this.vectorPosition, this.speed);
   }
 
   moveInZContinuo(qntMove, alpha) {
     this.vectorPosition.z += qntMove;
     this.cone.position.lerp(this.vectorPosition, alpha);
-    if(this.obj != undefined)
-    this.obj.position.lerp(this.vectorPosition, alpha);
+    if (this.obj != undefined)
+      this.obj.position.lerp(this.vectorPosition, alpha);
   }
 
   getVectorPosition() {
@@ -67,7 +66,7 @@ export class AirplanePlayer {
     this.cone.position.set(posInitPlayerX, posInitPlayerY, posInitPlayerZ);
     this.vectorPosition.copy(this.cone.position);
   }
-  getAviao(){
+  getAviao() {
     return this.obj;
   }
   shot(scene, tiros) {
@@ -83,14 +82,10 @@ export class AirplanePlayer {
   }
 
   atingido() {
-    this.cone.material.color.setHex(0xff4c4c);
     this.rotate();
-    setTimeout(function () {
-      material.color.setHex(0x32ff32);
-    }, 1000);
   }
   rotate() {
     for (let i = 0; i < 360; i += 0.01)
-      this.cone.rotateZ(THREE.Math.degToRad(i));
+      this.obj.rotateZ(THREE.Math.degToRad(i));
   }
 }

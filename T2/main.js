@@ -32,17 +32,20 @@ let scene,
   posInitPlayerX,
   posInitPlayerY,
   posInitPlayerZ,
-  start;
+  start,
+  cheating;
 
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
 planeSize = 500; //Tamanho do plano
 speed = 0.1;
 moveSpeedAirplane = 0.4;
-maxDistanceShot = 150;
+maxDistanceShot = 130;
 posInitPlayerX = 0;
 posInitPlayerY = 5;
 posInitPlayerZ = -20;
 start = true;
+cheating = false;
+
 //------------------------------------------------------------------------------------//
 
 scene = new THREE.Scene(); // Create main scene
@@ -93,6 +96,8 @@ function keyboardCamera() {
     if (keyboard.down("space")) player.shot(scene, shotsList);
 
     if (keyboard.down("ctrl")) player.shot(scene, shotsList);
+    
+    if (keyboard.pressed("G")) cheating = !cheating;
   }
 }
 //---------------------------------------------------------------------
@@ -102,32 +107,32 @@ function keyboardCamera() {
 function removeShotsCollisionsAndOutPlane() {
   for (var i = 0; i < shotsList.length; i++) {
     //Calcula a distancia do tiro do player para remover
-    let distance = player
-      .getVectorPosition()
-      .distanceTo(shotsList[i].getVectorPosition());
-
-    for (var j = 0; j < enemyList.length; j++) {
-      if (detectCollisionCubes(shotsList[i].tiro(), enemyList[j].cube)) {
-        //Se colidir  com o inimigo remove os dois
-        removeFromScene(shotsList[i].tiro(), 0); //Remove tiro da cena
-        shotsList.splice(i, 1); //Remove tiro do vetor
-
-        enemyList[j].changeColor(); //Altera a cor: animação
-        enemyList[j].rotate();
-        removeFromScene(enemyList[j].obj, 0.5); //Remove da cena apos 0.5 segundos
-
-        removeFromScene(enemyList[j].cube, 0.5); //Remove da cena apos 0.5 segundos
-        enemyList.splice(j, 1); //Remove do vetor
-
-        break;
-      }
-    }
+    let distance = cameraHolder.position.distanceTo(
+      shotsList[i].getVectorPosition()
+    );
+    let removed = false;
     if (distance > maxDistanceShot) {
       //Remove o tiro se ele esta longe do jogador: fora da tela
       removeFromScene(shotsList[i].tiro(), 0);
-
       shotsList.splice(i, 1);
+      removed = true;
     }
+    if (!removed)
+      for (var j = 0; j < enemyList.length; j++)
+        if (detectCollisionCubes(shotsList[i].tiro(), enemyList[j].cube)) {
+          //Se colidir  com o inimigo remove os dois
+          removeFromScene(shotsList[i].tiro(), 0); //Remove tiro da cena
+          shotsList.splice(i, 1); //Remove tiro do vetor
+
+          enemyList[j].changeColor(); //Altera a cor: animação
+          enemyList[j].rotate();
+          removeFromScene(enemyList[j].obj, 0.5); //Remove da cena apos 0.5 segundos
+
+          removeFromScene(enemyList[j].cube, 0.5); //Remove da cena apos 0.5 segundos
+          enemyList.splice(j, 1); //Remove do vetor
+
+          break;
+        }
   }
 }
 
@@ -191,15 +196,18 @@ function renderInfinityPlane() {
 }
 
 function render() {
+  keyboardCamera();
+
   if (start) {
     updateAnimations();
     gerEnemy();
-    removeAirplaneCollision();
+    if (!cheating) removeAirplaneCollision();
   }
-  keyboardCamera();
-  removeShotsCollisionsAndOutPlane();
-  requestAnimationFrame(render);
+
+  if (!cheating) removeShotsCollisionsAndOutPlane();
+
   removeAirplaneOutPlane();
+  requestAnimationFrame(render);
   renderer.render(scene, camera);
 }
 
@@ -271,32 +279,35 @@ function detectCollisionCubes(object1, object2) {
 
 function gerEnemy() {
   // Numero maximo de inimigos: 6
-  if (enemyList.length < 6) {
+
+  if (enemyList.length < 6 && start) {
     //ADD novo avião lista de inimigos ainda vivos
     enemyList.push(
       new AirplaneEnemy(
-        0.5,
-        2,
         -60 + Math.floor(Math.random() * 101), //valor da coordenada x. minimo: -60 maximo 60
         5,
-        player.getVectorPosition().z - (90 + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: 90 maxima: 100
+        cameraHolder.position.z -
+          (maxDistanceShot + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: distância maxima do tir,  maxima:  distância maxima do tiro + 10
         Math.random() * (0.0001 - 0.0004),
         scene
       )
     );
   }
-  for (var i = 0; i < enemyList.length; i++) scene.add(enemyList[i].cube); // add inimigos na cena
 }
 
 //---------------------------------------------------------
 function restart() {
   start = false;
   player.atingido();
-  setTimeout(function () {
-    for (var i = 0; i < enemyList.length; i++)
-      removeFromScene(enemyList[i].cube, 0); //Remove da cena
 
-    enemyList.splice(0, enemyList.length); // Remove lista
+  setTimeout(function () {
+    enemyList.forEach(function (enemy) {
+      removeFromScene(enemy.cube, 0); //Remove da cena
+      removeFromScene(enemy.obj, 0); //Remove da cena
+    });
+
+    enemyList.splice(0, enemyList.length);
+
     plane.position.z = 0; //Reseta os planos
     plane2.position.z = -planeSize;
     cameraHolder.position.z = 0; //Reseta a camera
@@ -309,8 +320,6 @@ function restart() {
 
 function createPlayer() {
   player = new AirplanePlayer(
-    0.5,
-    2,
     posInitPlayerX,
     posInitPlayerY,
     posInitPlayerZ,
