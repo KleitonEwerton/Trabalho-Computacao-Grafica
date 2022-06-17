@@ -59,8 +59,16 @@ createPlayer();
 
 let shotsList = [];
 let enemyList = [];
+let enemyShot = [];
 
 render();
+
+const myInterval = window.setInterval(function () {
+  enemyList.forEach(enemy=>{
+    enemy.shot(scene, enemyShot, player.getVectorPosition());
+    // console.log(enemyShot.length);
+  });
+}, 1000);
 
 //----------------------- Controles ----------------------------------
 function keyboardCamera() {
@@ -96,7 +104,7 @@ function keyboardCamera() {
     if (keyboard.down("space")) player.shot(scene, shotsList);
 
     if (keyboard.down("ctrl")) player.shot(scene, shotsList);
-    
+
     if (keyboard.pressed("G")) cheating = !cheating;
   }
 }
@@ -178,6 +186,9 @@ function updateAnimations() {
   renderInfinityPlane();
   cameraHolder.translateZ(-speed);
   player.moveInZContinuo(-speed, 1);
+  enemyShot.forEach(enemy=>{
+    enemy.move(1);
+  });
 }
 
 //------------------------------------------------------------------------

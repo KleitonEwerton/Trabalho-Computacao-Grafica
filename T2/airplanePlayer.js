@@ -75,7 +75,8 @@ export class AirplanePlayer {
       this.vectorPosition.y,
       this.vectorPosition.z - 2,
       false,
-      this.color
+      this.color,
+      this.getVectorPosition()
     );
     scene.add(tir.tiro());
     tiros.push(tir);

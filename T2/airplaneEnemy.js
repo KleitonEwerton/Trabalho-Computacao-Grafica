@@ -2,16 +2,14 @@ import * as THREE from "three";
 import { Projetil } from "./projetil.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 
-
 const geometry = new THREE.BoxGeometry(7, 2, 7);
+let material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
 let loader = new GLTFLoader();
 
 export class AirplaneEnemy {
   constructor(posx, posy, posz, speed, scene) {
     this.isEnemy = true;
     this.speed = speed;
-
-    let material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
     this.cube = new THREE.Mesh(geometry, material);
     this.cube.position.set(posx, posy, posz);
 
@@ -26,7 +24,7 @@ export class AirplaneEnemy {
       loader.load(PATH, function (object) {
         object.scene.position.set(posx, 0, posz);
         object.scene.scale.set(1.5, 1.5, 1.5);
-        object.scene.rotateY(0 *Math.PI);   
+        object.scene.rotateY(0 * (Math.PI/180));   
         afterload(object.scene);
       });
     }
@@ -35,7 +33,7 @@ export class AirplaneEnemy {
 
     this.vectorPosition = new THREE.Vector3();
     this.vectorPosition.copy(this.cube.position);
-    scene.add(this.cube); //! Para ver o quadrado retire o comentário dessa linha
+    //scene.add(this.cube); //! Para ver o quadrado retire o comentário dessa linha
   }
   cube() {
     return this.cube();
@@ -51,20 +49,25 @@ export class AirplaneEnemy {
     this.cube.position.lerp(this.vectorPosition, this.speed);
     if (this.obj != undefined)
       this.obj.position.lerp(this.vectorPosition, this.speed);
+
   }
 
   getVectorPosition() {
     return this.vectorPosition;
   }
 
-  shot(scene, tiros) {
+  shot(scene, tiros,vectorPlayer) {
+    this.vectorPosition.copy(this.cube.position);
+
     let tir = new Projetil(
       this.vectorPosition.x,
       this.vectorPosition.y,
       this.vectorPosition.z,
       this.isEnemy,
-      this.color
+      this.color,
+      vectorPlayer
     );
+    
     scene.add(tir.tiro());
     tiros.push(tir);
   }
