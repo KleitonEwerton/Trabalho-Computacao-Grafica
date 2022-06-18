@@ -1,8 +1,6 @@
 import * as THREE from "three";
-import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
-import { Vector3 } from "../build/three.module.js";
+
 import KeyboardState from "../libs/util/KeyboardState.js";
-import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 
 import {
   initRenderer,
@@ -41,7 +39,7 @@ speed = 0.1;
 moveSpeedAirplane = 0.4;
 maxDistanceShot = 130;
 posInitPlayerX = 0;
-posInitPlayerY = 5;
+posInitPlayerY = 10;
 posInitPlayerZ = -20;
 start = true;
 cheating = false;
@@ -64,10 +62,11 @@ let enemyShot = [];
 render();
 
 const myInterval = window.setInterval(function () {
-  enemyList.forEach(enemy=>{
-    enemy.shot(scene, enemyShot, player.getVectorPosition());
-    // console.log(enemyShot.length);
-  });
+  if (start)
+    enemyList.forEach((enemy) => {
+      console.log(player.getVectorPosition());
+      enemy.shot(scene, enemyShot, player.getVectorPosition());
+    });
 }, 1000);
 
 //----------------------- Controles ----------------------------------
@@ -82,7 +81,7 @@ function keyboardCamera() {
   frustum.setFromProjectionMatrix(matrix);
 
   let position1 = new THREE.Vector3();
-  position1.setFromMatrixPosition(player.cone.matrixWorld);
+  position1.setFromMatrixPosition(player.airplane.matrixWorld);
 
   if (start) {
     if (keyboard.pressed("up")) {
@@ -146,7 +145,7 @@ function removeShotsCollisionsAndOutPlane() {
 
 function removeAirplaneCollision() {
   for (var i = 0; i < enemyList.length; i++)
-    if (detectCollisionCubes(player.cone, enemyList[i].cube)) {
+    if (detectCollisionCubes(player.airplane, enemyList[i].cube)) {
       restart();
     }
 }
@@ -174,7 +173,7 @@ function removeFromScene(obj, timeSegundos) {
 
 function updateShots() {
   for (var i = 0; i < shotsList.length; i++)
-    shotsList[i].moveInZ(-speed * 20, 0.1);
+    shotsList[i].moveInZ(-speed * 20, 0.5);
 }
 function updateAllEnemys() {
   for (var i = 0; i < enemyList.length; i++) enemyList[i].moveInZContinuo(-5);
@@ -186,7 +185,7 @@ function updateAnimations() {
   renderInfinityPlane();
   cameraHolder.translateZ(-speed);
   player.moveInZContinuo(-speed, 1);
-  enemyShot.forEach(enemy=>{
+  enemyShot.forEach((enemy) => {
     enemy.move(1);
   });
 }
@@ -216,7 +215,7 @@ function render() {
   }
 
   if (!cheating) removeShotsCollisionsAndOutPlane();
-
+  removeEnemyShot();
   removeAirplaneOutPlane();
   requestAnimationFrame(render);
   renderer.render(scene, camera);
@@ -296,7 +295,7 @@ function gerEnemy() {
     enemyList.push(
       new AirplaneEnemy(
         -60 + Math.floor(Math.random() * 101), //valor da coordenada x. minimo: -60 maximo 60
-        5,
+        posInitPlayerY,
         cameraHolder.position.z -
           (maxDistanceShot + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: distância maxima do tir,  maxima:  distância maxima do tiro + 10
         Math.random() * (0.0001 - 0.0004),
@@ -310,6 +309,10 @@ function gerEnemy() {
 function restart() {
   start = false;
   player.atingido();
+  enemyShot.forEach(function (item) {
+    removeFromScene(item.shot, 0);
+  });
+  enemyShot.splice(0, enemyShot.length);
 
   setTimeout(function () {
     enemyList.forEach(function (enemy) {
@@ -337,4 +340,18 @@ function createPlayer() {
     0.005,
     scene
   );
+}
+
+function removeEnemyShot() {
+  for (let i = 0; i < enemyShot.length; i++) {
+    if (
+      enemyShot[i].getVectorPosition().distanceTo(player.getVectorPosition()) >
+      maxDistanceShot
+    ) {
+      removeFromScene(enemyShot[i].shot, 0);
+      enemyShot.splice(i, 1);
+      console.log(enemyShot.length);
+      break;
+    }
+  }
 }

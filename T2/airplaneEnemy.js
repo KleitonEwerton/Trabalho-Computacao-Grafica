@@ -1,5 +1,7 @@
 import * as THREE from "three";
-import { Projetil } from "./projetil.js";
+import { AirMissile } from "./airMissile.js";
+import { LandMissile } from "./landMissile.js";
+import { Airplanes } from "./airplanes.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 
 const geometry = new THREE.BoxGeometry(7, 2, 7);
@@ -22,7 +24,7 @@ export class AirplaneEnemy {
     //! função assincrona loaderObject3D -> load objeto 3d
     function loaderObject3D(PATH) {
       loader.load(PATH, function (object) {
-        object.scene.position.set(posx, 0, posz);
+        object.scene.position.set(posx, posy, posz);
         object.scene.scale.set(1.5, 1.5, 1.5);
         object.scene.rotateY(0 * (Math.PI/180));   
         afterload(object.scene);
@@ -45,10 +47,13 @@ export class AirplaneEnemy {
   }
 
   moveInZContinuo(qntMove) {
-    this.vectorPosition.z += qntMove;
-    this.cube.position.lerp(this.vectorPosition, this.speed);
+    
+    this.cube.translateZ(0.1);
+    this.vectorPosition.copy(this.cube.position);
+    let vector = new THREE.Vector3().copy(this.cube.position);
+    vector.y = 5;
     if (this.obj != undefined)
-      this.obj.position.lerp(this.vectorPosition, this.speed);
+      this.obj.position.lerp(vector, 1);
 
   }
 
@@ -59,12 +64,11 @@ export class AirplaneEnemy {
   shot(scene, tiros,vectorPlayer) {
     this.vectorPosition.copy(this.cube.position);
 
-    let tir = new Projetil(
+    let tir = new AirMissile(
       this.vectorPosition.x,
       this.vectorPosition.y,
       this.vectorPosition.z,
       this.isEnemy,
-      this.color,
       vectorPlayer
     );
     
