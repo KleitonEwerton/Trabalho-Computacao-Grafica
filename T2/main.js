@@ -21,7 +21,8 @@ import {
   posInitPlayerY,
   posInitPlayerZ,
 } from "./controllers.js";
-
+import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
+import { AirplaneEnemyDiagonal } from "./AirplaneEnemyDiagonal.js";
 let scene,
   renderer,
   camera,
@@ -145,11 +146,11 @@ function removeShotsCollisionsAndOutPlane() {
 }
 
 function removeAirplaneCollision() {
-  enemyList.forEach(enemy=>{
+  enemyList.forEach((enemy) => {
     if (detectCollisionCubes(player.airplane, enemy.cube)) {
       restart();
     }
-  });  
+  });
 }
 
 function removeAirplaneOutPlane() {
@@ -230,16 +231,47 @@ function gerEnemysByConfigs() {
   let inimigo = inimigos[posCam];
   if (inimigo != undefined && contidos.indexOf(posCam) == -1) {
     contidos.push(posCam);
-    enemyList.push(
-      new AirplaneEnemy(
+
+    let enemy_local;
+    if (inimigo["type"] == "parable") {
+      enemy_local = gerAirplaneEnemyParable(
+        inimigo["posx"],
+        inimigo["posy"],
+        cameraHolder.position.z - 150,
+        0.0001,
+        scene,
+        inimigo["angleY"]
+      );
+    } else if (inimigo["type"] == "diagonal") {
+      enemy_local = gerAirplaneEnemyDiagonal(
+        inimigo["posx"],
+        inimigo["posy"],
+        cameraHolder.position.z - 150,
+        0.0001,
+        scene,
+        inimigo["angleY"]
+      );
+    } else {
+      enemy_local = gerAirplaneEnemyNormal(
         inimigo["posx"],
         inimigo["posy"],
         cameraHolder.position.z - 150,
         0.0001,
         scene
-      )
-    );
+      );
+    }
+    enemyList.push(enemy_local);
   }
+}
+
+function gerAirplaneEnemyNormal(posx, posy, posz, speed, sc, angleY) {
+  return new AirplaneEnemy(posx, posy, posz, speed, sc, angleY);
+}
+function gerAirplaneEnemyDiagonal(posx, posy, posz, speed, sc, angleY) {
+  return new AirplaneEnemyDiagonal(posx, posy, posz, speed, sc, angleY);
+}
+function gerAirplaneEnemyParable(posx, posy, posz, speed, sc, angleY) {
+  return new AirplaneEnemyParable(posx, posy, posz, speed, sc, angleY);
 }
 
 //--------------------Configs-----------------------------------

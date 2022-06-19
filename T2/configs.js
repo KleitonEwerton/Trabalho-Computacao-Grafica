@@ -1,16 +1,35 @@
-export let inimigos = 
-{
+// ?       type:    {
 
-    "-5":{"type": "normal", "posx":10, "posy":10},
-    "-6":{"type": "normal", "posx":-10, "posy":10},
-    "-10":{"type": "normal", "posx":-20, "posy":10},
-    "-15":{"type": "normal", "posx":-30, "posy":10},
-    "-20":{"type": "normal", "posx":36, "posy":10},
-    "-25":{"type": "normal", "posx":30, "posy":10},
-    "-30":{"type": "normal", "posx":-20, "posy":10},
-    "-35":{"type": "normal", "posx":-30, "posy":10},
-    "-40":{"type": "normal", "posx":-36, "posy":10},
-    "-45":{"type": "normal", "posx":36, "posy":10}
+//!                 normal: vai de cima para baixo
+//!                 diagonal: vai da direita para a esquerda ou esquerda para diretia na diagonal, 
+//!                     a direção depende de angleY, angles negativos esquerda para direita, positivos direita para esquerda
+//!                 parable:  vai da direita para a esquerda ou esquerda para diretia em forma de parabola, 
+//!                     a direção depende se o seu x inicial e positivo ou negativo
 
-}
- 
+//?                 }
+//!
+//?         angleY  {
+
+//!                 para os type (normal e diagonal) serve para rotacionar o avião durante a criação do objeto, considere um angleY de 0ª, 45ª ou -45ª, 
+//!                     já para o em type(parable) e a rotação durante seu movimento considere angleY de 0.0025. APENAS SUGESTÃO
+
+//?                 }
+//?         posx    {
+
+//!                 para types (normal) deve-se usar posx onde o player possa ir
+
+//?                 }
+
+export let inimigos = {
+
+  "-10": { type: "normal", posx: -36, posy: 10, angleY: 0 },
+  "-11": { type: "normal", posx: 0, posy: 10, angleY: 0 },
+  "-12": { type: "normal", posx: 36, posy: 10, angleY: 0 },
+  "-20": { type: "diagonal", posx: -80, posy: 10, angleY: 45 },
+  "-21": { type: "diagonal", posx: 80, posy: 10, angleY: -45 },
+  "-30": { type: "parable", posx: -80, posy: 10, angleY: 0.0025 },
+  "-31": { type: "parable", posx: 80, posy: 10, angleY: 0.0025 },
+  "-40": { type: "diagonal", posx: -60, posy: 10, angleY: 45 },
+  "-41": { type: "diagonal", posx: 60, posy: 10, angleY: -45 },
+  
+};

@@ -7,7 +7,7 @@ import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 let loader = new GLTFLoader();
 
 export class Airplanes {
-  constructor(posx, posy, posz, speed, scene, path,geometry, material) {
+  constructor(posx, posy, posz, speed, scene, path, geometry, material) {
     this.speed = speed;
 
     const afterload = (object) => {
@@ -22,17 +22,20 @@ export class Airplanes {
         object.scene.scale.set(0.5, 0.5, 0.5);
         object.scene.rotateY((3 * Math.PI) / 2);
 
+        object.scene.traverse(function (child) {
+          if (child) child.castShadow = true;
+        });
+
         afterload(object.scene);
       });
     }
 
     this.airplane = new THREE.Mesh(geometry, material);
     this.airplane.position.set(posx, posy, posz);
-    this.airplane.rotateX(3*Math.PI/2 );
+    this.airplane.rotateX((3 * Math.PI) / 2);
     this.vectorPosition = new THREE.Vector3();
     this.vectorPosition.copy(this.airplane.position);
 
-    
     // scene.add(this.airplane);  //! Para ver o cone retire o comentário dessa linha
   }
   airplane() {
@@ -45,21 +48,22 @@ export class Airplanes {
   }
 
   moveInZ(qntMove) {
-    this.vectorPosition.z += 1.4 * qntMove;
-    this.airplane.position.lerp(this.vectorPosition, this.speed);
-    if (this.obj != undefined)
+    if (this.obj != undefined) {
+      this.vectorPosition.z += 1.4 * qntMove;
+      this.airplane.position.lerp(this.vectorPosition, this.speed);
       this.obj.position.lerp(this.vectorPosition, this.speed);
+    }
   }
 
   moveInZContinuo(qntMove, alpha) {
-    this.vectorPosition.z += qntMove;
-    this.airplane.position.lerp(this.vectorPosition, alpha);
-    if (this.obj != undefined)
+    if (this.obj != undefined) {
+      this.vectorPosition.z += qntMove;
+      this.airplane.position.lerp(this.vectorPosition, alpha);
       this.obj.position.lerp(this.vectorPosition, alpha);
+    }
   }
 
   getVectorPosition() {
-    
     return this.vectorPosition;
   }
 
@@ -87,6 +91,6 @@ export class Airplanes {
   }
   rotate() {
     for (let i = 0; i < 360; i += 0.01)
-      if(this.obj != undefined) this.obj.rotateZ(THREE.Math.degToRad(i));
+      if (this.obj != undefined) this.obj.rotateY(THREE.Math.degToRad(i));
   }
 }
