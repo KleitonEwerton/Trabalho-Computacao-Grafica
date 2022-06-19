@@ -4,7 +4,6 @@ import * as THREE from "three";
 export class Projeteis {
 
   constructor(posx, posy, posz, isEnemy, vectorPlayer, geometry, material) {
-    console.log(vectorPlayer);
     this.enemy = isEnemy;
     this.transition = 1;
     this.shot = new THREE.Mesh(geometry, material);

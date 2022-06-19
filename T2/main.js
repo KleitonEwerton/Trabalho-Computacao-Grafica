@@ -11,8 +11,16 @@ import {
 
 import { AirplaneEnemy } from "./airplaneEnemy.js";
 import { AirplanePlayer } from "./airplanePlayer.js";
-
+import { inimigos } from "./configs.js";
 let keyboard = new KeyboardState();
+import {
+  max_axle_x,
+  min_axle_x,
+  maxDistanceShot,
+  posInitPlayerX,
+  posInitPlayerY,
+  posInitPlayerZ,
+} from "./controllers.js";
 
 let scene,
   renderer,
@@ -26,10 +34,6 @@ let scene,
   player,
   speed,
   moveSpeedAirplane,
-  maxDistanceShot,
-  posInitPlayerX,
-  posInitPlayerY,
-  posInitPlayerZ,
   start,
   cheating;
 
@@ -37,10 +41,7 @@ let scene,
 planeSize = 500; //Tamanho do plano
 speed = 0.1;
 moveSpeedAirplane = 0.4;
-maxDistanceShot = 130;
-posInitPlayerX = 0;
-posInitPlayerY = 10;
-posInitPlayerZ = -20;
+
 start = true;
 cheating = false;
 
@@ -58,13 +59,13 @@ createPlayer();
 let shotsList = [];
 let enemyList = [];
 let enemyShot = [];
+let contidos = [];
 
 render();
 
 const myInterval = window.setInterval(function () {
   if (start)
     enemyList.forEach((enemy) => {
-      console.log(player.getVectorPosition());
       enemy.shot(scene, enemyShot, player.getVectorPosition());
     });
 }, 1000);
@@ -73,33 +74,33 @@ const myInterval = window.setInterval(function () {
 function keyboardCamera() {
   keyboard.update();
 
-  const frustum = new THREE.Frustum();
-  const matrix = new THREE.Matrix4().multiplyMatrices(
-    camera.projectionMatrix,
-    camera.matrixWorldInverse
-  );
-  frustum.setFromProjectionMatrix(matrix);
-
-  let position1 = new THREE.Vector3();
-  position1.setFromMatrixPosition(player.airplane.matrixWorld);
-
   if (start) {
-    if (keyboard.pressed("up")) {
-      position1.z -= 2.5;
-      if (frustum.containsPoint(position1)) player.moveInZ(-moveSpeedAirplane);
-    }
-    if (keyboard.pressed("down")) {
-      position1.z += 2.5;
-      if (frustum.containsPoint(position1)) player.moveInZ(moveSpeedAirplane);
-    }
-    if (keyboard.pressed("left")) {
-      position1.x -= 0.8;
-      if (frustum.containsPoint(position1)) player.moveInX(-moveSpeedAirplane);
-    }
-    if (keyboard.pressed("right")) {
-      position1.x += 0.8;
-      if (frustum.containsPoint(position1)) player.moveInX(moveSpeedAirplane);
-    }
+    if (
+      keyboard.pressed("up") &&
+      player.airplane.position.z - moveSpeedAirplane >=
+        cameraHolder.position.z - maxDistanceShot
+    )
+      player.moveInZ(-moveSpeedAirplane);
+
+    if (
+      keyboard.pressed("down") &&
+      player.airplane.position.z + moveSpeedAirplane <=
+        cameraHolder.position.z - 5
+    )
+      player.moveInZ(moveSpeedAirplane);
+
+    if (
+      keyboard.pressed("left") &&
+      player.airplane.position.x + moveSpeedAirplane >= min_axle_x
+    )
+      player.moveInX(-moveSpeedAirplane);
+
+    if (
+      keyboard.pressed("right") &&
+      player.airplane.position.x - moveSpeedAirplane <= max_axle_x
+    )
+      player.moveInX(moveSpeedAirplane);
+
     if (keyboard.down("space")) player.shot(scene, shotsList);
 
     if (keyboard.down("ctrl")) player.shot(scene, shotsList);
@@ -144,17 +145,16 @@ function removeShotsCollisionsAndOutPlane() {
 }
 
 function removeAirplaneCollision() {
-  for (var i = 0; i < enemyList.length; i++)
-    if (detectCollisionCubes(player.airplane, enemyList[i].cube)) {
+  enemyList.forEach(enemy=>{
+    if (detectCollisionCubes(player.airplane, enemy.cube)) {
       restart();
     }
+  });  
 }
 
 function removeAirplaneOutPlane() {
   for (var i = 0; i < enemyList.length; i++) {
     if (enemyList[i].cube.position.z > cameraHolder.position.z) {
-      // remove o inimigo que já não está mais visivel
-
       removeFromScene(enemyList[i].obj, 0); //Remove da cena apos 0.5 segundos
       removeFromScene(enemyList[i].cube, 0);
       enemyList.splice(i, 1);
@@ -172,11 +172,15 @@ function removeFromScene(obj, timeSegundos) {
 //------------------------------ Updates ------------------------------------
 
 function updateShots() {
-  for (var i = 0; i < shotsList.length; i++)
-    shotsList[i].moveInZ(-speed * 20, 0.5);
+  shotsList.forEach((enemy) => {
+    enemy.moveInZ(-speed * 20, 0.5);
+  });
 }
+
 function updateAllEnemys() {
-  for (var i = 0; i < enemyList.length; i++) enemyList[i].moveInZContinuo(-5);
+  enemyList.forEach((enemy) => {
+    enemy.moveInZContinuo(0.2);
+  });
 }
 
 function updateAnimations() {
@@ -210,7 +214,7 @@ function render() {
 
   if (start) {
     updateAnimations();
-    gerEnemy();
+    gerEnemysByConfigs();
     if (!cheating) removeAirplaneCollision();
   }
 
@@ -219,6 +223,23 @@ function render() {
   removeAirplaneOutPlane();
   requestAnimationFrame(render);
   renderer.render(scene, camera);
+}
+
+function gerEnemysByConfigs() {
+  let posCam = Math.round(cameraHolder.position.z, 0).toString();
+  let inimigo = inimigos[posCam];
+  if (inimigo != undefined && contidos.indexOf(posCam) == -1) {
+    contidos.push(posCam);
+    enemyList.push(
+      new AirplaneEnemy(
+        inimigo["posx"],
+        inimigo["posy"],
+        cameraHolder.position.z - 150,
+        0.0001,
+        scene
+      )
+    );
+  }
 }
 
 //--------------------Configs-----------------------------------
@@ -290,7 +311,7 @@ function detectCollisionCubes(object1, object2) {
 function gerEnemy() {
   // Numero maximo de inimigos: 6
 
-  if (enemyList.length < 6 && start) {
+  if (enemyList.length < 0 && start) {
     //ADD novo avião lista de inimigos ainda vivos
     enemyList.push(
       new AirplaneEnemy(
@@ -313,6 +334,7 @@ function restart() {
     removeFromScene(item.shot, 0);
   });
   enemyShot.splice(0, enemyShot.length);
+  contidos.splice(0, contidos.length);
 
   setTimeout(function () {
     enemyList.forEach(function (enemy) {
@@ -350,7 +372,6 @@ function removeEnemyShot() {
     ) {
       removeFromScene(enemyShot[i].shot, 0);
       enemyShot.splice(i, 1);
-      console.log(enemyShot.length);
       break;
     }
   }

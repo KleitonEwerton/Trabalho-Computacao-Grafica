@@ -11,7 +11,6 @@ let material = new THREE.MeshLambertMaterial();
 export class AirMissile extends Projeteis {
 
   constructor(posx, posy, posz, isEnemy, vectorPlayer) {
-    console.log(vectorPlayer);
     super(posx, posy, posz, isEnemy, vectorPlayer, geometry,material);
   }
   

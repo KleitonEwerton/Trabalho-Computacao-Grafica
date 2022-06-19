@@ -48,7 +48,7 @@ export class AirplaneEnemy {
 
   moveInZContinuo(qntMove) {
     
-    this.cube.translateZ(0.1);
+    this.cube.translateZ(qntMove);
     this.vectorPosition.copy(this.cube.position);
     let vector = new THREE.Vector3().copy(this.cube.position);
     vector.y = 5;
