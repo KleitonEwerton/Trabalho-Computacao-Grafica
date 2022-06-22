@@ -9,7 +9,7 @@ let material = new THREE.MeshLambertMaterial({ color: 0x00ff000 });
 export class AirplanePlayer extends Airplanes{
   constructor(posx, posy, posz, speed, scene) {
   
-    super(posx, posy, posz, speed, scene,"./assets/player.glb",geometry, material);
+    super(posx, posy, posz, speed, scene,"./assets/player1/scene.glb",geometry, material);
 
   }
   

@@ -9,10 +9,7 @@ import {
   initDefaultBasicLight,
 } from "../libs/util/util.js";
 
-import { AirplaneEnemy } from "./airplaneEnemy.js";
-import { AirplanePlayer } from "./airplanePlayer.js";
-import { inimigos } from "./configs.js";
-let keyboard = new KeyboardState();
+import { enemys } from "./configs.js";
 import {
   max_axle_x,
   min_axle_x,
@@ -21,9 +18,15 @@ import {
   posInitPlayerY,
   posInitPlayerZ,
 } from "./controllers.js";
+
+import { AirplanePlayer } from "./airplanePlayer.js";
+import { AirplaneEnemy } from "./airplaneEnemy.js";
 import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
 import { AirplaneEnemyDiagonal } from "./AirplaneEnemyDiagonal.js";
+import { TerrestrialEnemy } from "./terrestrialEnemy.js";
+
 let scene,
+  keyboard,
   renderer,
   camera,
   cameraHolder,
@@ -39,6 +42,8 @@ let scene,
   cheating;
 
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
+keyboard = new KeyboardState();
+
 planeSize = 500; //Tamanho do plano
 speed = 0.1;
 moveSpeedAirplane = 0.4;
@@ -46,28 +51,38 @@ moveSpeedAirplane = 0.4;
 start = true;
 cheating = false;
 
+let list = [1, 2, 3, 4, 5, 6, 7];
+let controler = 0;
+while (controler < list.length) {
+  const item = list[controler];
+  if (item > 3) list.splice(controler, 1);
+  else controler++;
+}
+console.log(list);
 //------------------------------------------------------------------------------------//
 
 scene = new THREE.Scene(); // Create main scene
 renderer = initRenderer(); // Init a basic renderer
 initDefaultBasicLight(scene); // Luz
 configCamera();
-
 createPlanes();
-
 createPlayer();
 
 let shotsList = [];
+let shotsLandList = [];
 let enemyList = [];
 let enemyShot = [];
 let contidos = [];
 
 render();
 
-const myInterval = window.setInterval(function () {
+//funcao assincrona que realiza os disparos
+const myIntervalShots = window.setInterval(function () {
   if (start)
     enemyList.forEach((enemy) => {
-      enemy.shot(scene, enemyShot, player.getVectorPosition());
+      
+      if(cameraHolder.position.distanceTo(enemy.getVectorPosition())<maxDistanceShot)
+        enemy.shot(scene, enemyShot, player.getVectorPosition());
     });
 }, 1000);
 
@@ -102,11 +117,15 @@ function keyboardCamera() {
     )
       player.moveInX(moveSpeedAirplane);
 
-    if (keyboard.down("space")) player.shot(scene, shotsList);
-
     if (keyboard.down("ctrl")) player.shot(scene, shotsList);
+    
+    if (keyboard.down("space")) player.shotLand(scene, shotsList);
 
     if (keyboard.pressed("G")) cheating = !cheating;
+  }
+  if(!start){
+    if (keyboard.down("enter")) restart();
+
   }
 }
 //---------------------------------------------------------------------
@@ -129,7 +148,7 @@ function removeShotsCollisionsAndOutPlane() {
     if (!removed)
       for (var j = 0; j < enemyList.length; j++)
         if (detectCollisionCubes(shotsList[i].tiro(), enemyList[j].cube)) {
-          //Se colidir  com o inimigo remove os dois
+          //Se colidir  com o enemy remove os dois
           removeFromScene(shotsList[i].tiro(), 0); //Remove tiro da cena
           shotsList.splice(i, 1); //Remove tiro do vetor
 
@@ -148,7 +167,8 @@ function removeShotsCollisionsAndOutPlane() {
 function removeAirplaneCollision() {
   enemyList.forEach((enemy) => {
     if (detectCollisionCubes(player.airplane, enemy.cube)) {
-      restart();
+      start = false;
+      player.atingido();
     }
   });
 }
@@ -228,42 +248,57 @@ function render() {
 
 function gerEnemysByConfigs() {
   let posCam = Math.round(cameraHolder.position.z, 0).toString();
-  let inimigo = inimigos[posCam];
-  if (inimigo != undefined && contidos.indexOf(posCam) == -1) {
+  let enemy = enemys[posCam];
+  if (enemy != undefined && contidos.indexOf(posCam) == -1) {
     contidos.push(posCam);
 
     let enemy_local;
-    if (inimigo["type"] == "parable") {
-      enemy_local = gerAirplaneEnemyParable(
-        inimigo["posx"],
-        inimigo["posy"],
-        cameraHolder.position.z - 150,
-        0.0001,
-        scene,
-        inimigo["angleY"]
-      );
-    } else if (inimigo["type"] == "diagonal") {
-      enemy_local = gerAirplaneEnemyDiagonal(
-        inimigo["posx"],
-        inimigo["posy"],
-        cameraHolder.position.z - 150,
-        0.0001,
-        scene,
-        inimigo["angleY"]
-      );
-    } else {
-      enemy_local = gerAirplaneEnemyNormal(
-        inimigo["posx"],
-        inimigo["posy"],
-        cameraHolder.position.z - 150,
-        0.0001,
-        scene
-      );
+    switch (enemy["type"]) {
+      case "parable":
+        enemy_local = gerAirplaneEnemyParable(
+          enemy["posx"],
+          enemy["posy"],
+          cameraHolder.position.z - 150,
+          0.0001,
+          scene,
+          enemy["angleY"]
+        );
+        break;
+
+      case "diagonal":
+        enemy_local = gerAirplaneEnemyDiagonal(
+          enemy["posx"],
+          enemy["posy"],
+          cameraHolder.position.z - 150,
+          0.0001,
+          scene,
+          enemy["angleY"]
+        );
+        break;
+      case "normal":
+        enemy_local = gerAirplaneEnemyNormal(
+          enemy["posx"],
+          enemy["posy"],
+          cameraHolder.position.z - 150,
+          0.0001,
+          scene
+        );
+        break;
+
+        case "terrestrial":
+        enemy_local = gerTerrestrialEnemy(
+          enemy["posx"],
+          enemy["posy"],
+          cameraHolder.position.z - 150,
+          0.0001,
+          scene,enemy["angleY"]
+        );
+        break;
     }
+
     enemyList.push(enemy_local);
   }
 }
-
 function gerAirplaneEnemyNormal(posx, posy, posz, speed, sc, angleY) {
   return new AirplaneEnemy(posx, posy, posz, speed, sc, angleY);
 }
@@ -273,7 +308,9 @@ function gerAirplaneEnemyDiagonal(posx, posy, posz, speed, sc, angleY) {
 function gerAirplaneEnemyParable(posx, posy, posz, speed, sc, angleY) {
   return new AirplaneEnemyParable(posx, posy, posz, speed, sc, angleY);
 }
-
+function gerTerrestrialEnemy(posx, posy, posz, speed, sc, angleY) {
+  return new TerrestrialEnemy(posx, posy, posz, speed, sc, angleY);
+}
 //--------------------Configs-----------------------------------
 
 function configCamera() {
@@ -340,28 +377,9 @@ function detectCollisionCubes(object1, object2) {
   return box1.intersectsBox(box2);
 }
 
-function gerEnemy() {
-  // Numero maximo de inimigos: 6
-
-  if (enemyList.length < 0 && start) {
-    //ADD novo avião lista de inimigos ainda vivos
-    enemyList.push(
-      new AirplaneEnemy(
-        -60 + Math.floor(Math.random() * 101), //valor da coordenada x. minimo: -60 maximo 60
-        posInitPlayerY,
-        cameraHolder.position.z -
-          (maxDistanceShot + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: distância maxima do tir,  maxima:  distância maxima do tiro + 10
-        Math.random() * (0.0001 - 0.0004),
-        scene
-      )
-    );
-  }
-}
-
 //---------------------------------------------------------
 function restart() {
-  start = false;
-  player.atingido();
+  
   enemyShot.forEach(function (item) {
     removeFromScene(item.shot, 0);
   });

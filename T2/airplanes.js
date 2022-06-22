@@ -85,6 +85,17 @@ export class Airplanes {
     scene.add(tir.tiro());
     tiros.push(tir);
   }
+  shotLand(scene, tiros) {
+    let tir = new LandMissile(
+      this.vectorPosition.x,
+      this.vectorPosition.y,
+      this.vectorPosition.z - 2,
+      false,
+      this.getVectorPosition()
+    );
+    scene.add(tir.tiro());
+    tiros.push(tir);
+  }
 
   atingido() {
     this.rotate();

@@ -9,10 +9,10 @@ let material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
 let loader = new GLTFLoader();
 
 export class AirplaneEnemy {
-  constructor(posx, posy, posz, speed, scene, angleY = 0, path="./assets/enemy.gltf") {
+  constructor(posx, posy, posz, speed, scene, angleY = 0, path = "./assets/enemy1/scene.gltf", geometry_obj = geometry, scale=1.5) {
     this.isEnemy = true;
     this.speed = speed;
-    this.cube = new THREE.Mesh(geometry, material);
+    this.cube = new THREE.Mesh(geometry_obj, material);
     this.cube.position.set(posx, posy, posz);
     this.cube.rotateY(angleY * (Math.PI / 180));
 
@@ -26,7 +26,7 @@ export class AirplaneEnemy {
     function loaderObject3D(PATH) {
       loader.load(PATH, function (object) {
         object.scene.position.set(posx, posy, posz);
-        object.scene.scale.set(1.5, 1.5, 1.5);
+        object.scene.scale.set(scale, scale, scale);
         object.scene.rotateY(angleY * (Math.PI / 180));
 
         object.scene.traverse(function(child) {

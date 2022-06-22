@@ -1,10 +1,5 @@
 import * as THREE from "three";
-import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
-import { AirMissile } from "./airMissile.js";
 import { AirplaneEnemy } from "./airplaneEnemy.js";
-
-const geometry = new THREE.ConeGeometry(2, 8, 30);
-let material = new THREE.MeshLambertMaterial({ color: 0x00ff000 });
 
 export class AirplaneEnemyParable extends AirplaneEnemy {
   constructor(posx, posy, posz, speed, scene, angleY) {
