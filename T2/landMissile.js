@@ -14,10 +14,11 @@ export class LandMissile extends Projeteis {
     super(posx, posy, posz, isEnemy, vectorPlayer, geometry,material);
 
   }
-  moveInZ(qntMove, alpha, moveY = -0.8, limiteY = 5) {
-    this.vectorPosition.z += 2 * qntMove;
+  moveInZ(qntMove, alpha, moveY = -1.25, limiteY = 3) {
+    this.vectorPosition.z += 2*qntMove;
     if(moveY && moveY + this.vectorPosition.y > limiteY) 
       this.vectorPosition.y += moveY;
     this.shot.position.lerp(this.vectorPosition, alpha);
+    
   }
 }

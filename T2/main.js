@@ -17,7 +17,11 @@ import {
   posInitPlayerX,
   posInitPlayerY,
   posInitPlayerZ,
+  shotPerSecond,
+  enemyShotPerSecond,
 } from "./controllers.js";
+
+import {distanceBetweenTwoPointsXZ} from "./utils.js"
 
 import { AirplanePlayer } from "./airplanePlayer.js";
 import { AirplaneEnemy } from "./airplaneEnemy.js";
@@ -39,8 +43,7 @@ let scene,
   speed,
   moveSpeedAirplane,
   start,
-  cheating,
-  shotPerSecond;
+  cheating;
 
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
 keyboard = new KeyboardState();
@@ -48,19 +51,18 @@ keyboard = new KeyboardState();
 planeSize = 500; //Tamanho do plano
 speed = 0.1;
 moveSpeedAirplane = 0.4;
-shotPerSecond = 3;
 
 start = true;
 cheating = false;
 
-let list = [1, 2, 3, 4, 5, 6, 7];
-let controler = 0;
-while (controler < list.length) {
-  const item = list[controler];
-  if (item > 3) list.splice(controler, 1);
-  else controler++;
-}
-console.log(list);
+// let list = [1, 2, 3, 4, 5, 6, 7];
+// let controler = 0;
+// while (controler < list.length) {
+//   const item = list[controler];
+//   if (item > 3) list.splice(controler, 1);
+//   else controler++;
+// }
+
 //------------------------------------------------------------------------------------//
 
 scene = new THREE.Scene(); // Create main scene
@@ -71,8 +73,9 @@ createPlanes();
 createPlayer();
 
 let shotsList = [];
-let shotsLandList = [];
+let landShotsList = [];
 let enemyList = [];
+let landenemyList = [];
 let enemyShot = [];
 let contidos = [];
 
@@ -88,7 +91,14 @@ const myIntervalShots = window.setInterval(function () {
       )
         enemy.shot(scene, enemyShot, player.getVectorPosition());
     });
-}, 1000);
+  landenemyList.forEach((enemy) => {
+    if (
+      cameraHolder.position.distanceTo(enemy.getVectorPosition()) <
+      maxDistanceShot
+    )
+      enemy.shot(scene, enemyShot, player.getVectorPosition());
+  });
+}, 1000 / enemyShotPerSecond);
 
 //----------------------- Controles ----------------------------------
 let atirarM = true;
@@ -124,15 +134,13 @@ function keyboardCamera() {
     )
       player.moveInX(moveSpeedAirplane);
 
- 
-
     if (keyboard.pressed("ctrl")) {
       if (atirar) {
         atirar = false;
         setTimeout(function () {
           atirar = true;
           player.shot(scene, shotsList);
-        }, 1000/shotPerSecond);
+        }, 1000 / shotPerSecond);
       }
     }
 
@@ -141,16 +149,15 @@ function keyboardCamera() {
         atirarM = false;
         setTimeout(function () {
           atirarM = true;
-          player.shotLand(scene, shotsList);
-        }, 1000/shotPerSecond);
+          player.shotLand(scene, landShotsList);
+        }, 1000 / shotPerSecond);
       }
     }
-
-    if (keyboard.pressed("G")) cheating = !cheating;
   }
   if (!start) {
     if (keyboard.down("enter")) restart();
   }
+  if (keyboard.down("G")) cheating = !cheating;
 }
 //---------------------------------------------------------------------
 
@@ -159,10 +166,10 @@ function keyboardCamera() {
 function removeShotsCollisionsAndOutPlane() {
   for (var i = 0; i < shotsList.length; i++) {
     //Calcula a distancia do tiro do player para remover
-    let distance = cameraHolder.position.distanceTo(
-      shotsList[i].getVectorPosition()
-    );
+    let distance = distanceBetweenTwoPointsXZ(cameraHolder.position, shotsList[i].getVectorPosition())
+
     let removed = false;
+
     if (distance > maxDistanceShot) {
       //Remove o tiro se ele esta longe do jogador: fora da tela
       removeFromScene(shotsList[i].tiro(), 0);
@@ -188,29 +195,77 @@ function removeShotsCollisionsAndOutPlane() {
   }
 }
 
-function removeAirplaneCollision() {
-  enemyList.forEach((enemy) => {
-    if (detectCollisionCubes(player.airplane, enemy.cube)) {
-      start = false;
-      player.atingido();
+function removeLandShotCollisionsAndOutPlane() {
+  for (var i = 0; i < landShotsList.length; i++) {
+    //Calcula a distancia do tiro do player para remover
+    
+    let distance = distanceBetweenTwoPointsXZ(cameraHolder.position, landShotsList[i].getVectorPosition())
+
+    let removed = false;
+
+    if (distance > maxDistanceShot) {
+      //Remove o tiro se ele esta longe do jogador: fora da tela
+      removeFromScene(landShotsList[i].tiro(), 0);
+      landShotsList.splice(i, 1);
+      removed = true;
     }
-  });
+    if (!removed)
+      for (var j = 0; j < landenemyList.length; j++) {
+        console.log(landenemyList[i] + " ", landShotsList[j]);
+        if (
+          detectCollisionCubes(landShotsList[i].tiro(), landenemyList[j].cube)
+        ) {
+          //Se colidir  com o enemy remove os dois
+          removeFromScene(landShotsList[i].tiro(), 0); //Remove tiro da cena
+          landShotsList.splice(i, 1); //Remove tiro do vetor
+
+          landenemyList[j].changeColor(); //Altera a cor: animação
+          landenemyList[j].rotate();
+          removeFromScene(landenemyList[j].obj, 0.5); //Remove da cena apos 0.5 segundos
+
+          removeFromScene(landenemyList[j].cube, 0.5); //Remove da cena apos 0.5 segundos
+          landenemyList.splice(j, 1); //Remove do vetor
+
+          break;
+        }
+      }
+  }
+}
+
+function removeAirplaneCollision() {
+  if (!cheating)
+    enemyList.forEach((enemy) => {
+      if (detectCollisionCubes(player.airplane, enemy.cube)) {
+        start = false;
+        player.atingido();
+      }
+    });
+}
+
+function removeAirplaneCollisionProjeteis() {
+  if (!cheating)
+    enemyShot.forEach((enemy) => {
+      if (detectCollisionCubes(player.airplane, enemy.tiro())) {
+        start = false;
+        player.atingido();
+      }
+    });
 }
 
 function removeAirplaneOutPlane() {
   for (var i = 0; i < enemyList.length; i++) {
     if (enemyList[i].cube.position.z > cameraHolder.position.z) {
-      removeFromScene(enemyList[i].obj, 0); //Remove da cena apos 0.5 segundos
+      removeFromScene(enemyList[i].obj, 0);
       removeFromScene(enemyList[i].cube, 0);
       enemyList.splice(i, 1);
     }
   }
 }
 
-function removeFromScene(obj, timeSegundos) {
+function removeFromScene(obj, timeInSecond) {
   setTimeout(function () {
     scene.remove(obj);
-  }, timeSegundos * 1000); // funcao que remove da cena com uma animação
+  }, timeInSecond * 1000); // funcao que remove da cena com uma animação
 }
 //----------------------------------------------------------------------
 
@@ -221,7 +276,11 @@ function updateShots() {
     enemy.moveInZ(-speed * 20, 0.5);
   });
 }
-
+function updateLandShots() {
+  landShotsList.forEach((enemy) => {
+    enemy.moveInZ(-speed * 20, 0.5);
+  });
+}
 
 function updateAllEnemys() {
   enemyList.forEach((enemy) => {
@@ -232,6 +291,7 @@ function updateAllEnemys() {
 function updateAnimations() {
   updateAllEnemys();
   updateShots();
+  updateLandShots();
   renderInfinityPlane();
   cameraHolder.translateZ(-speed);
   player.moveInZContinuo(-speed, 1);
@@ -261,10 +321,12 @@ function render() {
   if (start) {
     updateAnimations();
     gerEnemysByConfigs();
-    if (!cheating) removeAirplaneCollision();
+    removeAirplaneCollision();
+    removeAirplaneCollisionProjeteis();
   }
 
-  if (!cheating) removeShotsCollisionsAndOutPlane();
+  removeShotsCollisionsAndOutPlane();
+  removeLandShotCollisionsAndOutPlane();
   removeEnemyShot();
   removeAirplaneOutPlane();
   requestAnimationFrame(render);
@@ -319,7 +381,8 @@ function gerEnemysByConfigs() {
           scene,
           enemy["angleY"]
         );
-        break;
+        landenemyList.push(enemy_local);
+        return;
     }
 
     enemyList.push(enemy_local);
@@ -443,7 +506,8 @@ function removeEnemyShot() {
   for (let i = 0; i < enemyShot.length; i++) {
     if (
       enemyShot[i].getVectorPosition().distanceTo(player.getVectorPosition()) >
-      maxDistanceShot
+        maxDistanceShot ||
+      enemyShot[i].getVectorPosition().z > cameraHolder.position.z
     ) {
       removeFromScene(enemyShot[i].shot, 0);
       enemyShot.splice(i, 1);
