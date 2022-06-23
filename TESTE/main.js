@@ -6,7 +6,7 @@ import {
   initRenderer,
   onWindowResize,
   createGroundPlaneWired,
-  initDefaultBasicLight,
+  initDefaultBasicLight,createLightSphere,
 } from "../libs/util/util.js";
 
 import { enemys } from "./configs.js";
@@ -39,8 +39,7 @@ let scene,
   speed,
   moveSpeedAirplane,
   start,
-  cheating,
-  shotPerSecond;
+  cheating;
 
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
 keyboard = new KeyboardState();
@@ -48,7 +47,6 @@ keyboard = new KeyboardState();
 planeSize = 500; //Tamanho do plano
 speed = 0.1;
 moveSpeedAirplane = 0.4;
-shotPerSecond = 3;
 
 start = true;
 cheating = false;
@@ -64,8 +62,14 @@ console.log(list);
 //------------------------------------------------------------------------------------//
 
 scene = new THREE.Scene(); // Create main scene
-renderer = initRenderer(); // Init a basic renderer
-initDefaultBasicLight(scene); // Luz
+// renderer = initRenderer(); // Init a basic renderer
+
+renderer = new THREE.WebGLRenderer();
+document.getElementById("webgl-output").appendChild( renderer.domElement );  
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type  = THREE.VSMShadowMap; // default
+// initDefaultBasicLight(scene); // Luz
 configCamera();
 createPlanes();
 createPlayer();
@@ -76,24 +80,42 @@ let enemyList = [];
 let enemyShot = [];
 let contidos = [];
 
+var ambientLight = new THREE.AmbientLight("rgb(100,100,100)");
+scene.add( ambientLight );
+var lightPosition = new THREE.Vector3(0, 50, -100);
+
+var dirLight = new THREE.DirectionalLight("rgb(255,255,255)");
+  dirLight.position.copy(lightPosition);
+  dirLight.castShadow = true;
+  // Shadow Parameters
+  dirLight.shadow.mapSize.width = 256;
+  dirLight.shadow.mapSize.height = 256;
+  dirLight.shadow.camera.near = 0;
+  dirLight.shadow.camera.far = 200;
+  dirLight.shadow.camera.left = -20;
+  dirLight.shadow.camera.right = 20;
+  dirLight.shadow.camera.bottom = -20;
+  dirLight.shadow.camera.top = 20;
+  dirLight.shadow.bias = -0.0005; 
+  scene.add(dirLight);
+  dirLight.rotateZ( 360* (Math.PI / 180));
+  const shadowHelper = new THREE.CameraHelper(dirLight.shadow.camera);
+  shadowHelper.visible = true;
+  scene.add(shadowHelper);
+
 render();
 
 //funcao assincrona que realiza os disparos
 const myIntervalShots = window.setInterval(function () {
   if (start)
     enemyList.forEach((enemy) => {
-      if (
-        cameraHolder.position.distanceTo(enemy.getVectorPosition()) <
-        maxDistanceShot
-      )
+      
+      if(cameraHolder.position.distanceTo(enemy.getVectorPosition())<maxDistanceShot)
         enemy.shot(scene, enemyShot, player.getVectorPosition());
     });
 }, 1000);
 
 //----------------------- Controles ----------------------------------
-let atirarM = true;
-let atirar = true;
-
 function keyboardCamera() {
   keyboard.update();
 
@@ -124,32 +146,15 @@ function keyboardCamera() {
     )
       player.moveInX(moveSpeedAirplane);
 
- 
-
-    if (keyboard.pressed("ctrl")) {
-      if (atirar) {
-        atirar = false;
-        setTimeout(function () {
-          atirar = true;
-          player.shot(scene, shotsList);
-        }, 1000/shotPerSecond);
-      }
-    }
-
-    if (keyboard.pressed("space")) {
-      if (atirarM) {
-        atirarM = false;
-        setTimeout(function () {
-          atirarM = true;
-          player.shotLand(scene, shotsList);
-        }, 1000/shotPerSecond);
-      }
-    }
+    if (keyboard.down("ctrl")) player.shot(scene, shotsList);
+    
+    if (keyboard.down("space")) player.shotLand(scene, shotsList);
 
     if (keyboard.pressed("G")) cheating = !cheating;
   }
-  if (!start) {
+  if(!start){
     if (keyboard.down("enter")) restart();
+
   }
 }
 //---------------------------------------------------------------------
@@ -222,7 +227,6 @@ function updateShots() {
   });
 }
 
-
 function updateAllEnemys() {
   enemyList.forEach((enemy) => {
     enemy.moveInZContinuo(0.2);
@@ -236,7 +240,7 @@ function updateAnimations() {
   cameraHolder.translateZ(-speed);
   player.moveInZContinuo(-speed, 1);
   enemyShot.forEach((enemy) => {
-    enemy.move(1, player.getVectorPosition());
+    enemy.move(1);
   });
 }
 
@@ -310,14 +314,13 @@ function gerEnemysByConfigs() {
         );
         break;
 
-      case "terrestrial":
+        case "terrestrial":
         enemy_local = gerTerrestrialEnemy(
           enemy["posx"],
           enemy["posy"],
           cameraHolder.position.z - 150,
           0.0001,
-          scene,
-          enemy["angleY"]
+          scene,enemy["angleY"]
         );
         break;
     }
@@ -372,7 +375,10 @@ function configCamera() {
 function createPlanes() {
   //Criar plano
   plane = createGroundPlaneWired(planeSize, planeSize, 50, 50);
+  plane.receiveShadow = true;
   plane2 = createGroundPlaneWired(planeSize, planeSize, 50, 50);
+  plane2.receiveShadow = true;
+
   //Add plano na cena
   scene.add(plane);
   scene.add(plane2);
@@ -405,6 +411,7 @@ function detectCollisionCubes(object1, object2) {
 
 //---------------------------------------------------------
 function restart() {
+  
   enemyShot.forEach(function (item) {
     removeFromScene(item.shot, 0);
   });

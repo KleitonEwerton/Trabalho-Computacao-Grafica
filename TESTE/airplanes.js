@@ -37,6 +37,7 @@ export class Airplanes {
     this.vectorPosition.copy(this.airplane.position);
 
     //scene.add(this.airplane);  //! Para ver o cone retire o comentário dessa linha
+    //this.airplane.castShadow = true;
   }
   airplane() {
     return this.airplane;

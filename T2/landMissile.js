@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Projeteis } from "./projeteis.js";
 
-const geometry = new THREE.BoxGeometry(1, 1, 5);
+const geometry = new THREE.BoxGeometry(0.5, 0.5, 3);
 let material = new THREE.MeshLambertMaterial();
 /*
 
@@ -11,7 +11,13 @@ let material = new THREE.MeshLambertMaterial();
 export class LandMissile extends Projeteis {
   constructor(posx, posy, posz, isEnemy, vectorPlayer) {
 
-    super(posx, posy/2, posz, isEnemy, vectorPlayer, geometry,material);
+    super(posx, posy, posz, isEnemy, vectorPlayer, geometry,material);
 
+  }
+  moveInZ(qntMove, alpha, moveY = -0.8, limiteY = 5) {
+    this.vectorPosition.z += 2 * qntMove;
+    if(moveY && moveY + this.vectorPosition.y > limiteY) 
+      this.vectorPosition.y += moveY;
+    this.shot.position.lerp(this.vectorPosition, alpha);
   }
 }

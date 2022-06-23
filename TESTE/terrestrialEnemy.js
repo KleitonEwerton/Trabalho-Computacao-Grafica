@@ -1,5 +1,4 @@
 import { AirplaneEnemy } from "./airplaneEnemy.js";
-import {LandMissileEnemy} from "./landMissileEnemy.js";
 import * as THREE from "three";
 
 const geometry = new THREE.BoxGeometry(4, 6, 4);
@@ -13,21 +12,5 @@ export class TerrestrialEnemy extends AirplaneEnemy {
 
     //Não se movimenta
 
-  }
-
-  shot(scene, tiros, vectorPlayer) {
-    
-    this.vectorPosition.copy(this.cube.position);
-
-    let tir = new LandMissileEnemy(
-      this.vectorPosition.x,
-      this.vectorPosition.y,
-      this.vectorPosition.z,
-      this.isEnemy,
-      vectorPlayer
-    );
-    tir.rotateX();
-    scene.add(tir.tiro());
-    tiros.push(tir);
   }
 }

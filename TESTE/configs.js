@@ -22,10 +22,7 @@
 
 export let enemys = {
 
-  "-1": { type: "terrestrial", posx: -20, posy: 0, angleY: 180 },
-  "-2": { type: "terrestrial", posx: 20, posy: 0, angleY: 180 },
-  "-4": { type: "terrestrial", posx: -20, posy: 0, angleY: 180 },
-  "-5": { type: "terrestrial", posx: 20, posy: 0, angleY: 180 },
+  "-1": { type: "terrestrial", posx: -36, posy: 0, angleY: 180 },
   "-11": { type: "normal", posx: 0, posy: 10, angleY: 0 },
   "-12": { type: "normal", posx: 36, posy: 10, angleY: 0 },
   "-20": { type: "diagonal", posx: -80, posy: 10, angleY: 45 },
