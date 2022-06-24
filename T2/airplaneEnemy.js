@@ -19,6 +19,7 @@ export class AirplaneEnemy {
     //! Função auxiliar para trabalhar com a função assincrona loaderObject3D
     const afterload = (object) => {
       this.obj = object;
+      this.obj.castShadow = true;
       scene.add(this.obj);
     };
 

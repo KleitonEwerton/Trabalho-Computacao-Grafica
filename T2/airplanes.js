@@ -12,6 +12,7 @@ export class Airplanes {
 
     const afterload = (object) => {
       this.obj = object;
+      this.obj.castShadow = true;
       scene.add(this.obj);
     };
 

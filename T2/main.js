@@ -7,6 +7,7 @@ import {
   onWindowResize,
   createGroundPlaneWired,
   initDefaultBasicLight,
+  createLightSphere,
 } from "../libs/util/util.js";
 
 import { enemys } from "./configs.js";
@@ -28,6 +29,7 @@ import { AirplaneEnemy } from "./airplaneEnemy.js";
 import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
 import { AirplaneEnemyDiagonal } from "./AirplaneEnemyDiagonal.js";
 import { TerrestrialEnemy } from "./terrestrialEnemy.js";
+import { Recharge } from "./recharge.js";
 
 let scene,
   keyboard,
@@ -66,8 +68,47 @@ cheating = false;
 //------------------------------------------------------------------------------------//
 
 scene = new THREE.Scene(); // Create main scene
-renderer = initRenderer(); // Init a basic renderer
-initDefaultBasicLight(scene); // Luz
+//renderer = initRenderer(); // Init a basic renderer
+//initDefaultBasicLight(scene); // Luz
+
+//----------------------------------- RENDERER ---------------------------------------//
+
+renderer = new THREE.WebGLRenderer();
+document.getElementById("webgl-output").appendChild( renderer.domElement );  
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type  = THREE.VSMShadowMap; // default
+
+//------------------------------------------------------------------------------------//
+
+//----------------------------- CONFIGURAÇÕES DE LUZ ---------------------------------//
+
+let lightIntensity = 0.9;
+let lightPosition = new THREE.Vector3(0.0, 30.0, 0.0);
+let lightColor = "rgb(255,255,255)";
+
+// Sphere to represent the light
+let lightSphere = createLightSphere(scene, 2, 10, 10, lightPosition);
+
+let dirLight = new THREE.DirectionalLight(lightColor);
+
+setDirectionalLighting(lightPosition);
+updateLightIntensity();
+
+const shadowHelper = new THREE.CameraHelper(dirLight.shadow.camera);
+  shadowHelper.visible = true;
+scene.add(shadowHelper);
+
+let targetObject = new THREE.Object3D();
+targetObject.position.set(0, 0, 0);
+scene.add(targetObject);
+
+dirLight.target = targetObject;
+scene.add(dirLight.target);
+
+//------------------------------------------------------------------------------------//
+
+
 configCamera();
 createPlanes();
 createPlayer();
@@ -78,6 +119,7 @@ let enemyList = [];
 let landenemyList = [];
 let enemyShot = [];
 let contidos = [];
+let rechargeList = [];
 
 render();
 
@@ -295,6 +337,11 @@ function updateAnimations() {
   renderInfinityPlane();
   cameraHolder.translateZ(-speed);
   player.moveInZContinuo(-speed, 1);
+
+  targetObject.translateZ(-speed);
+  lightPosition.z -= speed;
+  updateLightPosition();
+  
   enemyShot.forEach((enemy) => {
     enemy.move(1, player.getVectorPosition());
   });
@@ -321,8 +368,10 @@ function render() {
   if (start) {
     updateAnimations();
     gerEnemysByConfigs();
+    createRechargeCSG();
     removeAirplaneCollision();
     removeAirplaneCollisionProjeteis();
+    rechargeBattery();
   }
 
   removeShotsCollisionsAndOutPlane();
@@ -482,6 +531,10 @@ function restart() {
 
     enemyList.splice(0, enemyList.length);
 
+    targetObject.position.z = 0;
+    lightPosition.z = 0;
+    updateLightPosition();
+
     plane.position.z = 0; //Reseta os planos
     plane2.position.z = -planeSize;
     cameraHolder.position.z = 0; //Reseta a camera
@@ -514,4 +567,110 @@ function removeEnemyShot() {
       break;
     }
   }
+}
+
+function createRechargeCSG() {
+  
+  if (rechargeList.length < 2 && start) {
+    rechargeList.push(
+      new Recharge(
+        -60 + Math.floor(Math.random() * 101), //valor da coordenada x. minimo: -60 maximo 60
+        10,
+        cameraHolder.position.z -
+        (maxDistanceShot + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: distância maxima do tir,  maxima:  distância maxima do tiro + 10
+        Math.random() * (0.0001 - 0.0004),
+        scene
+      )
+    );
+  }
+}
+
+function rechargeBattery() {
+  for (var i = 0; i < rechargeList.length; i++)
+    if (detectCollisionCubes(player.airplane, rechargeList[i].recargaObject)) {
+      rechargeList.forEach(function (recharge) {
+        removeFromScene(recharge.recargaObject, 0); //Remove da cena
+        removeFromScene(recharge.obj, 0); //Remove da cena
+      });
+      rechargeList.splice(0, rechargeList.length);
+    }
+}
+
+function removeRecharge() {
+  for (var i = 0; i < rechargeList.length; i++) {
+    if (rechargeList[i].recargaObject.position.z > cameraHolder.position.z) {
+      // remove o inimigo que já não está mais visivel
+      removeFromScene(rechargeList[i].obj, 0); //Remove da cena apos 0.5 segundos
+      removeFromScene(rechargeList[i].recargaObject, 0);
+      rechargeList.splice(i, 1);
+    }
+  }
+}
+
+
+function setDirectionalLighting(position)
+{
+  dirLight.position.copy(position);
+  dirLight.castShadow = true;
+
+  // Shadow settings
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  dirLight.shadow.camera.near = 0.5;
+  dirLight.shadow.camera.far = 500;
+  dirLight.shadow.camera.left = -150;
+  dirLight.shadow.camera.right = 150;
+  dirLight.shadow.camera.bottom = -20;
+  dirLight.shadow.camera.top = 150;
+  dirLight.shadow.bias = -0.0005;  
+
+  // No effect on Basic and PCFSoft
+  dirLight.shadow.radius = 4;
+  
+  scene.add(dirLight);
+}
+
+// Update light intensity of the current light
+function updateLightIntensity()
+{
+  dirLight.intensity = lightIntensity;
+}
+
+
+// Update light position of the current light
+function updateLightPosition()
+{
+  dirLight.target.updateMatrixWorld();  
+  dirLight.position.copy(lightPosition);
+  lightSphere.position.copy(lightPosition);
+  dirLight.shadow.camera.updateProjectionMatrix();     
+  shadowHelper.update();    
+}
+
+export function initLight(position) 
+{
+  const ambientLight = new THREE.HemisphereLight(
+    'white', // bright sky color
+    'darkslategrey', // dim ground color
+    0.5, // intensity
+  );
+
+  const mainLight = new THREE.DirectionalLight('white', 0.7);
+    mainLight.position.copy(position);
+    mainLight.castShadow = true;
+   
+  const shadow = mainLight.shadow;
+    shadow.mapSize.width  =  1024; 
+    shadow.mapSize.height =  1024; 
+    shadow.camera.near    =  0.1; 
+    shadow.camera.far     =  50; 
+    shadow.camera.left    = -100.0; 
+    shadow.camera.right   =  100.0; 
+    shadow.camera.bottom  = -100.0; 
+    shadow.camera.top     =  100.0; 
+
+  scene.add(ambientLight);
+  scene.add(mainLight);
+
+  return mainLight;
 }
