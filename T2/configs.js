@@ -34,5 +34,7 @@ export let enemys = {
   "-20": { type: "parable", posx: 80, posy: 10, angleY: 0.0025 },
   "-25": { type: "diagonal", posx: -60, posy: 10, angleY: 45 },
   "-20": { type: "diagonal", posx: 60, posy: 10, angleY: -45 },
+  "-30": { type: "recharge", posx: 30, posy: 10, angleY: 0},
+
   
 };

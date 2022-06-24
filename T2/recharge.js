@@ -6,9 +6,8 @@ let csgCylinder, boxCylinderCSG; //cilindro
 let boxVertical, boxHorizontal, cylinderMesh; //objetos
 
 export class Recharge {
-    constructor(posx, posy, posz, speed, scene) {
+    constructor(posx, posy, posz, scene) {
 
-        this.speed = speed;
         //criando os objetos
         boxVertical = new THREE.Mesh(new THREE.BoxGeometry(1, 0.5, 2.5));
         boxVertical.position.set(0, 0, -5);
@@ -53,15 +52,5 @@ export class Recharge {
         return this.recargaObject;
     }
 
-    moveInZContinuo(qntMove) {
-        this.vectorPosition.z += qntMove;
-        this.recargaObject.position.lerp(this.vectorPosition, this.speed);
-        if (this.obj != undefined)
-          this.obj.position.lerp(this.vectorPosition, this.speed);
-      }
-      
-    getVectorPosition() {
-        return this.vectorPosition;
-    }
 
 }

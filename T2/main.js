@@ -368,7 +368,6 @@ function render() {
   if (start) {
     updateAnimations();
     gerEnemysByConfigs();
-    createRechargeCSG();
     removeAirplaneCollision();
     removeAirplaneCollisionProjeteis();
     rechargeBattery();
@@ -431,6 +430,10 @@ function gerEnemysByConfigs() {
           enemy["angleY"]
         );
         landenemyList.push(enemy_local);
+        return;
+
+        case "recharge":
+        createRechargeCSG(enemy["posx"]);
         return;
     }
 
@@ -569,16 +572,15 @@ function removeEnemyShot() {
   }
 }
 
-function createRechargeCSG() {
+function createRechargeCSG(posx) {
   
-  if (rechargeList.length < 2 && start) {
+  if (start) {
     rechargeList.push(
       new Recharge(
-        -60 + Math.floor(Math.random() * 101), //valor da coordenada x. minimo: -60 maximo 60
-        10,
+        posx, //valor da coordenada x. minimo: -60 maximo 60
+        posInitPlayerY,
         cameraHolder.position.z -
-        (maxDistanceShot + Math.floor(Math.random() * 11)), //Gera um z para distância inicial do inimigo. Distância minima: distância maxima do tir,  maxima:  distância maxima do tiro + 10
-        Math.random() * (0.0001 - 0.0004),
+        maxDistanceShot, //Gera um z para distância inicial do inimigo. Distância minima: distância maxima do tir,  maxima:  distância maxima do tiro + 10
         scene
       )
     );
