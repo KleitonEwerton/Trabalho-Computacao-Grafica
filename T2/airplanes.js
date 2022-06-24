@@ -9,7 +9,7 @@ let loader = new GLTFLoader();
 export class Airplanes {
   constructor(posx, posy, posz, speed, scene, path, geometry, material) {
     this.speed = speed;
-
+    this.life = 5;
     const afterload = (object) => {
       this.obj = object;
       scene.add(this.obj);

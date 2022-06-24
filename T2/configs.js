@@ -22,15 +22,17 @@
 
 export let enemys = {
 
-  "-1": { type: "terrestrial", posx: -20, posy: 0, angleY: 180 },
-  "-2": { type: "terrestrial", posx: 20, posy: 0, angleY: 180 },
-  "-11": { type: "normal", posx: 0, posy: 10, angleY: 0 },
-  "-12": { type: "normal", posx: 36, posy: 10, angleY: 0 },
-  "-20": { type: "diagonal", posx: -80, posy: 10, angleY: 45 },
-  "-21": { type: "diagonal", posx: 80, posy: 10, angleY: -45 },
-  "-30": { type: "parable", posx: -80, posy: 10, angleY: 0.0025 },
-  "-31": { type: "parable", posx: 80, posy: 10, angleY: 0.0025 },
-  "-40": { type: "diagonal", posx: -60, posy: 10, angleY: 45 },
-  "-41": { type: "diagonal", posx: 60, posy: 10, angleY: -45 },
+  "-1": { type: "diagonal", posx: -250, posy: 10, angleY: 90 },
+  "-2": { type: "diagonal", posx: 250, posy: 10, angleY: -90 },
+  "-3": { type: "terrestrial", posx: -20, posy: 0, angleY: 180 },
+  "-4": { type: "terrestrial", posx: 20, posy: 0, angleY: 180 },
+  "-6": { type: "normal", posx: -36, posy: 10, angleY: 0 },
+  "-7": { type: "normal", posx: 36, posy: 10, angleY: 0 },
+  "-8": { type: "diagonal", posx: -250, posy: 10, angleY: 90 },
+  "-9": { type: "diagonal", posx: 250, posy: 10, angleY: -90 },
+  "-15": { type: "parable", posx: -80, posy: 10, angleY: 0.0025 },
+  "-20": { type: "parable", posx: 80, posy: 10, angleY: 0.0025 },
+  "-25": { type: "diagonal", posx: -60, posy: 10, angleY: 45 },
+  "-20": { type: "diagonal", posx: 60, posy: 10, angleY: -45 },
   
 };
