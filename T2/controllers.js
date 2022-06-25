@@ -9,7 +9,7 @@ var maxDistanceShot = max_axle_z;
 
 //* Sobre o Player
 
-var shotPerSecond = 3;
+var shotPerSecond = 2;
 
 var posInitPlayerX = 0;
 var posInitPlayerY = 10;
