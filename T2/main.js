@@ -6,7 +6,6 @@ import {
   initRenderer,
   onWindowResize,
   createGroundPlaneWired,
-  initDefaultBasicLight,
   createLightSphere,
 } from "../libs/util/util.js";
 
@@ -20,9 +19,10 @@ import {
   posInitPlayerZ,
   shotPerSecond,
   enemyShotPerSecond,
+  speedEnemy,
 } from "./controllers.js";
 
-import {distanceBetweenTwoPointsXZ} from "./utils.js"
+import { distanceBetweenTwoPointsXZ } from "./utils.js";
 
 import { AirplanePlayer } from "./airplanePlayer.js";
 import { AirplaneEnemy } from "./airplaneEnemy.js";
@@ -57,27 +57,20 @@ moveSpeedAirplane = 0.4;
 start = true;
 cheating = false;
 
-// let list = [1, 2, 3, 4, 5, 6, 7];
-// let controler = 0;
-// while (controler < list.length) {
-//   const item = list[controler];
-//   if (item > 3) list.splice(controler, 1);
-//   else controler++;
-// }
-
 //------------------------------------------------------------------------------------//
 
 scene = new THREE.Scene(); // Create main scene
+let scene2 = new THREE.Scene(); // Create main scene
 //renderer = initRenderer(); // Init a basic renderer
 //initDefaultBasicLight(scene); // Luz
 
 //----------------------------------- RENDERER ---------------------------------------//
 
-renderer = new THREE.WebGLRenderer();
-document.getElementById("webgl-output").appendChild( renderer.domElement );  
+renderer = new THREE.WebGLRenderer({ alpha: true });
+document.getElementById("webgl-output").appendChild(renderer.domElement);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type  = THREE.VSMShadowMap; // default
+renderer.shadowMap.type = THREE.VSMShadowMap; // default
 
 //------------------------------------------------------------------------------------//
 
@@ -96,7 +89,7 @@ setDirectionalLighting(lightPosition);
 updateLightIntensity();
 
 const shadowHelper = new THREE.CameraHelper(dirLight.shadow.camera);
-  shadowHelper.visible = true;
+shadowHelper.visible = true;
 scene.add(shadowHelper);
 
 let targetObject = new THREE.Object3D();
@@ -107,7 +100,6 @@ dirLight.target = targetObject;
 scene.add(dirLight.target);
 
 //------------------------------------------------------------------------------------//
-
 
 configCamera();
 createPlanes();
@@ -120,9 +112,73 @@ let landenemyList = [];
 let enemyShot = [];
 let contidos = [];
 let rechargeList = [];
+let sphereList = [];
+
+const geometry = new THREE.SphereGeometry(0.25, 32, 16);
+const material = new THREE.MeshPhongMaterial({ color: "rgb(220,20,60)" });
+
+const sphere = new THREE.Mesh(geometry, material);
+sphere.position.set(0.0, 3.0, 0.0);
+
+const sphere2 = new THREE.Mesh(geometry, material);
+sphere2.position.set(0.5, 3.0, 0.0);
+
+const sphere3 = new THREE.Mesh(geometry, material);
+sphere3.position.set(1, 3.0, 0.0);
+
+const sphere4 = new THREE.Mesh(geometry, material);
+sphere4.position.set(-0.5, 3.0, 0.0);
+
+const sphere5 = new THREE.Mesh(geometry, material);
+sphere5.position.set(-1, 3.0, 0.0);
+
+let auxListSphere = [];
+auxListSphere.push(sphere3);
+auxListSphere.push(sphere2);
+auxListSphere.push(sphere);
+auxListSphere.push(sphere4);
+auxListSphere.push(sphere5);
+
+resetSpheres();
+
+//camera virtual usada para visualização das esferas da vida
+var lookAtVec = new THREE.Vector3(0.0, 3.0, 0.0);
+var camPosition = new THREE.Vector3(0.0, 3.0, 2.0);
+var upVec = new THREE.Vector3(0.0, 1.0, 0.0);
+var vcWidth = 200;
+var vcHeidth = 100;
+var virtualCamera = new THREE.PerspectiveCamera(
+  45,
+  vcWidth / vcHeidth,
+  1.0,
+  20.0
+);
+virtualCamera.position.copy(camPosition);
+virtualCamera.up.copy(upVec);
+virtualCamera.lookAt(lookAtVec);
+
+function controlledRender() {
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+
+  // Set main viewport
+  renderer.setViewport(0, 0, width, height); // Reset viewport
+  renderer.setScissorTest(false); // Disable scissor to paint the entire window
+  renderer.clear(); // Clean the window
+
+  renderer.render(scene, camera);
+  // Set virtual camera viewport
+  var offset = 30;
+  renderer.setViewport(offset, height - vcHeidth - offset, vcWidth, vcHeidth); // Set virtual camera viewport
+  renderer.setScissor(offset, height - vcHeidth - offset, vcWidth, vcHeidth); // Set scissor with the same size as the viewport
+  renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
+  renderer.setClearColor(0x000000, 0); // Use a darker clear color in the small viewport
+
+  renderer.render(scene2, virtualCamera); // Render scene of the virtual camera
+}
 
 render();
-
+renderer.autoClear = false;
 //funcao assincrona que realiza os disparos
 const myIntervalShots = window.setInterval(function () {
   if (start)
@@ -208,7 +264,10 @@ function keyboardCamera() {
 function removeShotsCollisionsAndOutPlane() {
   for (var i = 0; i < shotsList.length; i++) {
     //Calcula a distancia do tiro do player para remover
-    let distance = distanceBetweenTwoPointsXZ(cameraHolder.position, shotsList[i].getVectorPosition())
+    let distance = distanceBetweenTwoPointsXZ(
+      cameraHolder.position,
+      shotsList[i].getVectorPosition()
+    );
 
     let removed = false;
 
@@ -237,11 +296,15 @@ function removeShotsCollisionsAndOutPlane() {
   }
 }
 
+
 function removeLandShotCollisionsAndOutPlane() {
   for (var i = 0; i < landShotsList.length; i++) {
     //Calcula a distancia do tiro do player para remover
-    
-    let distance = distanceBetweenTwoPointsXZ(cameraHolder.position, landShotsList[i].getVectorPosition())
+
+    let distance = distanceBetweenTwoPointsXZ(
+      cameraHolder.position,
+      landShotsList[i].getVectorPosition()
+    );
 
     let removed = false;
 
@@ -253,7 +316,6 @@ function removeLandShotCollisionsAndOutPlane() {
     }
     if (!removed)
       for (var j = 0; j < landenemyList.length; j++) {
-        console.log(landenemyList[i] + " ", landShotsList[j]);
         if (
           detectCollisionCubes(landShotsList[i].tiro(), landenemyList[j].cube)
         ) {
@@ -276,27 +338,54 @@ function removeLandShotCollisionsAndOutPlane() {
 
 function removeAirplaneCollision() {
   if (!cheating)
-    enemyList.forEach((enemy) => {
-      if (detectCollisionCubes(player.airplane, enemy.cube)) {
-        start = false;
-        player.atingido();
+    
+    for (let cont = 0; cont < enemyList.length; cont++) {
+      if (detectCollisionCubes(player.airplane, enemyList[cont].cube)) {
+        player.danoTomado(1);
+        enemyList[cont].rotate();
+        removeFromScene(enemyList[cont].cube, 0);
+        removeFromScene(enemyList[cont].obj, 1);
+        enemyList.splice(cont, 1);
+        removeFirstSphere();
+
+        if (player.life <= 0) {
+          start = false;
+          player.atingido();
+        }
+        return;
       }
-    });
+    }
 }
 
 function removeAirplaneCollisionProjeteis() {
-  if (!cheating)
-    enemyShot.forEach((enemy) => {
-      if (detectCollisionCubes(player.airplane, enemy.tiro())) {
-        start = false;
-        player.atingido();
+  if (!cheating) {
+    for (let cont = 0; cont < enemyShot.length; cont++) {
+      if (detectCollisionCubes(player.airplane, enemyShot[cont].tiro())) {
+
+        for(let i = 0; i < enemyShot[cont].damage;i++)
+          removeFirstSphere();
+          
+        player.danoTomado(enemyShot[cont].damage);
+        removeFromScene(enemyShot[cont].tiro(), 0);
+        enemyShot.splice(cont, 1);
+
+        if (player.life <= 0) {
+          start = false;
+          player.atingido();
+        }
+        return;
       }
-    });
+    }
+  }
 }
 
 function removeAirplaneOutPlane() {
   for (var i = 0; i < enemyList.length; i++) {
-    if (enemyList[i].cube.position.z > cameraHolder.position.z) {
+    if (
+      enemyList[i].cube.position.z > cameraHolder.position.z ||
+      enemyList[i].cube.position.x > 301 ||
+      enemyList[i].cube.position.x < -301
+    ) {
       removeFromScene(enemyList[i].obj, 0);
       removeFromScene(enemyList[i].cube, 0);
       enemyList.splice(i, 1);
@@ -326,7 +415,7 @@ function updateLandShots() {
 
 function updateAllEnemys() {
   enemyList.forEach((enemy) => {
-    enemy.moveInZContinuo(0.2);
+    enemy.moveInZContinuo();
   });
 }
 
@@ -341,7 +430,7 @@ function updateAnimations() {
   targetObject.translateZ(-speed);
   lightPosition.z -= speed;
   updateLightPosition();
-  
+
   enemyShot.forEach((enemy) => {
     enemy.move(1, player.getVectorPosition());
   });
@@ -349,7 +438,7 @@ function updateAnimations() {
 
 //------------------------------------------------------------------------
 
-//----------------------------RENDER------------------------
+//-----------------------------------RENDER-------------------------------
 
 function renderInfinityPlane() {
   if (cameraHolder.position.z < limiterPlane) {
@@ -366,11 +455,11 @@ function render() {
   keyboardCamera();
 
   if (start) {
+    rechargeBattery();
     updateAnimations();
     gerEnemysByConfigs();
     removeAirplaneCollision();
     removeAirplaneCollisionProjeteis();
-    rechargeBattery();
   }
 
   removeShotsCollisionsAndOutPlane();
@@ -378,11 +467,12 @@ function render() {
   removeEnemyShot();
   removeAirplaneOutPlane();
   requestAnimationFrame(render);
-  renderer.render(scene, camera);
+  controlledRender();
 }
 
 function gerEnemysByConfigs() {
   let posCam = Math.round(cameraHolder.position.z, 0).toString();
+  console.log(posCam);
   let enemy = enemys[posCam];
   if (enemy != undefined && contidos.indexOf(posCam) == -1) {
     contidos.push(posCam);
@@ -394,7 +484,7 @@ function gerEnemysByConfigs() {
           enemy["posx"],
           enemy["posy"],
           cameraHolder.position.z - 150,
-          0.0001,
+          speedEnemy * enemy["alphaSpeed"],
           scene,
           enemy["angleY"]
         );
@@ -405,7 +495,7 @@ function gerEnemysByConfigs() {
           enemy["posx"],
           enemy["posy"],
           cameraHolder.position.z - 150,
-          0.0001,
+          speedEnemy * enemy["alphaSpeed"],
           scene,
           enemy["angleY"]
         );
@@ -415,7 +505,7 @@ function gerEnemysByConfigs() {
           enemy["posx"],
           enemy["posy"],
           cameraHolder.position.z - 150,
-          0.0001,
+          speedEnemy * enemy["alphaSpeed"],
           scene
         );
         break;
@@ -425,14 +515,14 @@ function gerEnemysByConfigs() {
           enemy["posx"],
           enemy["posy"],
           cameraHolder.position.z - 150,
-          0.0001,
+          speedEnemy * enemy["alphaSpeed"],
           scene,
           enemy["angleY"]
         );
         landenemyList.push(enemy_local);
         return;
 
-        case "recharge":
+      case "recharge":
         createRechargeCSG(enemy["posx"]);
         return;
     }
@@ -545,6 +635,8 @@ function restart() {
 
     start = true;
     player.rotate();
+    player.resetLife();
+    resetSpheres();
   }, 1000);
 }
 
@@ -573,14 +665,12 @@ function removeEnemyShot() {
 }
 
 function createRechargeCSG(posx) {
-  
   if (start) {
     rechargeList.push(
       new Recharge(
         posx, //valor da coordenada x. minimo: -60 maximo 60
         posInitPlayerY,
-        cameraHolder.position.z -
-        maxDistanceShot, //Gera um z para distância inicial do inimigo. Distância minima: distância maxima do tir,  maxima:  distância maxima do tiro + 10
+        cameraHolder.position.z - maxDistanceShot, //Gera um z para distância inicial do inimigo. Distância minima: distância maxima do tir,  maxima:  distância maxima do tiro + 10
         scene
       )
     );
@@ -590,28 +680,20 @@ function createRechargeCSG(posx) {
 function rechargeBattery() {
   for (var i = 0; i < rechargeList.length; i++)
     if (detectCollisionCubes(player.airplane, rechargeList[i].recargaObject)) {
-      rechargeList.forEach(function (recharge) {
-        removeFromScene(recharge.recargaObject, 0); //Remove da cena
-        removeFromScene(recharge.obj, 0); //Remove da cena
-      });
-      rechargeList.splice(0, rechargeList.length);
+      removeFromScene(rechargeList[i].recargaObject, 0); //Remove da cena
+      removeFromScene(rechargeList[i].obj, 0); //Remove da cena
+      
+      if(player.getLife() < 5){
+        rechargeList.splice(i, 1);
+        player.extraLife();
+        recoverySphere();
+      }
+     
+      return;
     }
 }
 
-function removeRecharge() {
-  for (var i = 0; i < rechargeList.length; i++) {
-    if (rechargeList[i].recargaObject.position.z > cameraHolder.position.z) {
-      // remove o inimigo que já não está mais visivel
-      removeFromScene(rechargeList[i].obj, 0); //Remove da cena apos 0.5 segundos
-      removeFromScene(rechargeList[i].recargaObject, 0);
-      rechargeList.splice(i, 1);
-    }
-  }
-}
-
-
-function setDirectionalLighting(position)
-{
+function setDirectionalLighting(position) {
   dirLight.position.copy(position);
   dirLight.castShadow = true;
 
@@ -624,55 +706,74 @@ function setDirectionalLighting(position)
   dirLight.shadow.camera.right = 150;
   dirLight.shadow.camera.bottom = -20;
   dirLight.shadow.camera.top = 150;
-  dirLight.shadow.bias = -0.0005;  
+  dirLight.shadow.bias = -0.0005;
 
   // No effect on Basic and PCFSoft
   dirLight.shadow.radius = 4;
-  
+
   scene.add(dirLight);
 }
 
 // Update light intensity of the current light
-function updateLightIntensity()
-{
+function updateLightIntensity() {
   dirLight.intensity = lightIntensity;
 }
 
-
 // Update light position of the current light
-function updateLightPosition()
-{
-  dirLight.target.updateMatrixWorld();  
+function updateLightPosition() {
+  dirLight.target.updateMatrixWorld();
   dirLight.position.copy(lightPosition);
   lightSphere.position.copy(lightPosition);
-  dirLight.shadow.camera.updateProjectionMatrix();     
-  shadowHelper.update();    
+  dirLight.shadow.camera.updateProjectionMatrix();
+  shadowHelper.update();
 }
 
-export function initLight(position) 
-{
+export function initLight(position) {
   const ambientLight = new THREE.HemisphereLight(
-    'white', // bright sky color
-    'darkslategrey', // dim ground color
-    0.5, // intensity
+    "white", // bright sky color
+    "darkslategrey", // dim ground color
+    0.5 // intensity
   );
 
-  const mainLight = new THREE.DirectionalLight('white', 0.7);
-    mainLight.position.copy(position);
-    mainLight.castShadow = true;
-   
+  const mainLight = new THREE.DirectionalLight("white", 0.7);
+  mainLight.position.copy(position);
+  mainLight.castShadow = true;
+
   const shadow = mainLight.shadow;
-    shadow.mapSize.width  =  1024; 
-    shadow.mapSize.height =  1024; 
-    shadow.camera.near    =  0.1; 
-    shadow.camera.far     =  50; 
-    shadow.camera.left    = -100.0; 
-    shadow.camera.right   =  100.0; 
-    shadow.camera.bottom  = -100.0; 
-    shadow.camera.top     =  100.0; 
+  shadow.mapSize.width = 1024;
+  shadow.mapSize.height = 1024;
+  shadow.camera.near = 0.1;
+  shadow.camera.far = 50;
+  shadow.camera.left = -100.0;
+  shadow.camera.right = 100.0;
+  shadow.camera.bottom = -100.0;
+  shadow.camera.top = 100.0;
 
   scene.add(ambientLight);
   scene.add(mainLight);
 
   return mainLight;
+}
+
+function removeFirstSphere() {
+  scene2.remove(sphereList[0]);
+  sphereList.splice(0, 1);
+}
+
+function resetSpheres() {
+  sphereList.splice(0, sphereList.length);
+  auxListSphere.forEach(s=>{
+    sphereList.push(s);
+  });
+  
+  sphereList.forEach(s => {
+    scene2.add(s);
+  });
+}
+function recoverySphere() {
+  
+  resetSpheres();
+  for(let i = 0; i < (5 - player.getLife()); i++) 
+    removeFirstSphere();
+
 }

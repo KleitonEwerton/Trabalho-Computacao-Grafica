@@ -15,7 +15,7 @@ export class AirplaneEnemy {
     this.cube = new THREE.Mesh(geometry_obj, material);
     this.cube.position.set(posx, posy, posz);
     this.cube.rotateY(angleY * (Math.PI / 180));
-
+    
     //! Função auxiliar para trabalhar com a função assincrona loaderObject3D
     const afterload = (object) => {
       this.obj = object;
@@ -54,9 +54,9 @@ export class AirplaneEnemy {
     this.cube.position.lerp(this.vectorPosition, 4 * this.speed);
   }
 
-  moveInZContinuo(qntMove) {
+  moveInZContinuo() {
     if (this.obj != undefined) {
-      this.cube.translateZ(qntMove);
+      this.cube.translateZ(this.speed);
       this.vectorPosition.copy(this.cube.position);
       let vector = new THREE.Vector3().copy(this.cube.position);
       vector.y = 5;

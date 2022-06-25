@@ -24,12 +24,11 @@ export class LandMissileEnemy extends Projeteis {
     else{
       if(!this.chegouAoTop){
         this.shot.rotateX(this.angleToUpper * (Math.PI / 180));
-        if (vectorPlayer.z < this.vectorPosition.z) 
-          this.transition = 1;
-        this.calAngle(vectorPlayer, this.vectorPosition);
+        
+        this.shot.lookAt(vectorPlayer);
       }
       this.chegouAoTop = true;
-      this.shot.translateZ(this.transition * qntMove);
+      this.shot.translateZ(qntMove);
     }
   }
   rotateX(){

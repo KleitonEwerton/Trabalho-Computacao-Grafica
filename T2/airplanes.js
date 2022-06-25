@@ -105,4 +105,16 @@ export class Airplanes {
     for (let i = 0; i < 360; i += 0.01)
       if (this.obj != undefined) this.obj.rotateY(THREE.Math.degToRad(i));
   }
+  getLife(){
+    return this.life;
+  }
+  resetLife(){
+    this.life = 5;
+  }
+  extraLife(){
+    this.life += 1;
+  }
+  danoTomado(damage){
+    this.life = this.life - damage;
+  }
 }

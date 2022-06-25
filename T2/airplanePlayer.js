@@ -10,7 +10,7 @@ export class AirplanePlayer extends Airplanes{
   constructor(posx, posy, posz, speed, scene) {
   
     super(posx, posy, posz, speed, scene,"./assets/player1/scene.glb",geometry, material);
-
+    this.life = 5;
   }
   
 }

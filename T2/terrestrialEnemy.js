@@ -2,14 +2,14 @@ import { AirplaneEnemy } from "./airplaneEnemy.js";
 import {LandMissileEnemy} from "./landMissileEnemy.js";
 import * as THREE from "three";
 
-const geometry = new THREE.BoxGeometry(5, 10, 5);
+const geometry = new THREE.BoxGeometry(8, 10, 8);
 
 export class TerrestrialEnemy extends AirplaneEnemy {
   constructor(posx, posy, posz, speed, scene, angleY) {
-    super(posx, posy, posz, speed, scene, angleY, "./assets/enemy3/scene.gltf", geometry, 2);
+    super(posx, posy, posz, speed, scene, angleY, "./assets/enemy4/scene.gltf", geometry, 2);
   }
 
-  moveInZContinuo(qntMove){
+  moveInZContinuo(){
 
     //Não se movimenta
 
