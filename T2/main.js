@@ -341,13 +341,13 @@ function removeAirplaneCollision() {
     
     for (let cont = 0; cont < enemyList.length; cont++) {
       if (detectCollisionCubes(player.airplane, enemyList[cont].cube)) {
-        player.danoTomado(1);
+        player.danoTomado(2);
         enemyList[cont].rotate();
         removeFromScene(enemyList[cont].cube, 0);
         removeFromScene(enemyList[cont].obj, 1);
         enemyList.splice(cont, 1);
         removeFirstSphere();
-
+        removeFirstSphere();
         if (player.life <= 0) {
           start = false;
           player.atingido();
