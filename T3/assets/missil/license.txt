@@ -1,0 +1,11 @@
+Model Information:
+* title:	Missil
+* source:	https://sketchfab.com/3d-models/missil-8fb580bbacf24316b5903f43f7adc0d3
+* author:	Marcelino Borges (https://sketchfab.com/marcelino_borges)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Missil" (https://sketchfab.com/3d-models/missil-8fb580bbacf24316b5903f43f7adc0d3) by Marcelino Borges (https://sketchfab.com/marcelino_borges) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
