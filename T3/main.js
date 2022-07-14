@@ -45,6 +45,7 @@ let scene,
   speed,
   moveSpeedAirplane,
   start,
+  pause,
   cheating;
 
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
@@ -56,6 +57,7 @@ moveSpeedAirplane = 0.4;
 
 start = true;
 cheating = false;
+pause = false;
 
 //------------------------------------------------------------------------------------//
 
@@ -205,7 +207,7 @@ let atirar = true;
 function keyboardCamera() {
   keyboard.update();
 
-  if (start) {
+  if (start && !pause) {
     if (
       keyboard.pressed("up") &&
       player.airplane.position.z - moveSpeedAirplane >=
@@ -252,9 +254,10 @@ function keyboardCamera() {
       }
     }
   }
-  if (!start) {
-    if (keyboard.down("enter")) restart();
-  }
+  if (!start && keyboard.down("enter")) restart();
+
+  if (keyboard.down("P")) pause = !pause;
+
   if (keyboard.down("G")) cheating = !cheating;
 }
 //---------------------------------------------------------------------
@@ -306,7 +309,7 @@ function removeLandShotCollisionsAndOutPlane() {
 
     let removed = false;
 
-    if (distance > (maxDistanceShot+50)) {
+    if (distance > maxDistanceShot) {
       //Remove o tiro se ele esta longe do jogador: fora da tela
       removeFromScene(landShotsList[i].tiro(), 0);
       landShotsList.splice(i, 1);
@@ -321,7 +324,6 @@ function removeLandShotCollisionsAndOutPlane() {
           removeFromScene(landShotsList[i].tiro(), 0); //Remove tiro da cena
           landShotsList.splice(i, 1); //Remove tiro do vetor
 
-          
           landenemyList[j].rotate();
           removeFromScene(landenemyList[j].obj, 0.5); //Remove da cena apos 0.5 segundos
 
@@ -448,21 +450,22 @@ function renderInfinityPlane() {
 
 function render() {
   keyboardCamera();
+  if (!pause) {
+    if (start) {
+      rechargeBattery();
+      updateAnimations();
+      gerEnemysByConfigs();
+      removeAirplaneCollision();
+      removeAirplaneCollisionProjeteis();
+    }
 
-  if (start) {
-    rechargeBattery();
-    updateAnimations();
-    gerEnemysByConfigs();
-    removeAirplaneCollision();
-    removeAirplaneCollisionProjeteis();
+    removeShotsCollisionsAndOutPlane();
+    removeLandShotCollisionsAndOutPlane();
+    removeEnemyShot();
+    removeAirplaneOutPlane();
+    controlledRender();
   }
-
-  removeShotsCollisionsAndOutPlane();
-  removeLandShotCollisionsAndOutPlane();
-  removeEnemyShot();
-  removeAirplaneOutPlane();
   requestAnimationFrame(render);
-  controlledRender();
 }
 
 function gerEnemysByConfigs() {
@@ -523,14 +526,14 @@ function gerEnemysByConfigs() {
     enemyList.push(enemy_local);
   }
 }
-function gerAirplaneEnemyNormal(posx, posy, posz, speed,  angleY) {
-  return new AirplaneEnemy(posx, posy, posz, speed,  angleY);
+function gerAirplaneEnemyNormal(posx, posy, posz, speed, angleY) {
+  return new AirplaneEnemy(posx, posy, posz, speed, angleY);
 }
-function gerAirplaneEnemyDiagonal(posx, posy, posz, speed,  angleY) {
-  return new AirplaneEnemyDiagonal(posx, posy, posz, speed,  angleY);
+function gerAirplaneEnemyDiagonal(posx, posy, posz, speed, angleY) {
+  return new AirplaneEnemyDiagonal(posx, posy, posz, speed, angleY);
 }
-function gerAirplaneEnemyParable(posx, posy, posz, speed,  angleY) {
-  return new AirplaneEnemyParable(posx, posy, posz, speed,  angleY);
+function gerAirplaneEnemyParable(posx, posy, posz, speed, angleY) {
+  return new AirplaneEnemyParable(posx, posy, posz, speed, angleY);
 }
 function gerTerrestrialEnemy(posx, posy, posz, speed, angleY) {
   return new TerrestrialEnemy(posx, posy, posz, speed, angleY);
