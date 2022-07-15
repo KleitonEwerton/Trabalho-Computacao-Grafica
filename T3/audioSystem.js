@@ -22,4 +22,4 @@ try {
 }
 
 
-export { audioLoader };
+export { audioLoader, sound };

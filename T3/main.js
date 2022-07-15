@@ -27,17 +27,19 @@ import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
 import { AirplaneEnemyDiagonal } from "./AirplaneEnemyDiagonal.js";
 import { TerrestrialEnemy } from "./terrestrialEnemy.js";
 
-import {camera,cameraHolder,configCamera} from "./cameraSystem.js";
+import { camera, cameraHolder, configCamera } from "./cameraSystem.js";
 import { removeFirstSphere, resetSpheres } from "./lifeSystem.js";
-import {updateLightPosition,targetObject,lightPosition} from "./lightSystem.js";
+import {
+  updateLightPosition,
+  targetObject,
+  lightPosition,
+} from "./lightSystem.js";
 import { rechargeBattery, createRechargeCSG } from "./rechargeSystem.js";
 
-import{audioLoader} from "./audioSystem.js";
+import { audioLoader, sound } from "./audioSystem.js";
 
 let keyboard,
   renderer,
-  
-
   plane,
   plane2,
   planeSize,
@@ -180,8 +182,7 @@ function keyboardCamera() {
       inclination = true;
     }
 
-    if(!inclination)
-      player.resetInclination();
+    if (!inclination) player.resetInclination();
     if (keyboard.pressed("ctrl")) {
       if (atirar) {
         atirar = false;
@@ -204,7 +205,11 @@ function keyboardCamera() {
   }
   if (!start && keyboard.down("enter")) restart();
 
-  if (keyboard.down("P")) pause = !pause;
+  if (keyboard.down("P")) {
+    pause = !pause;
+    if (pause) sound.pause();
+    else sound.play();
+  }
 
   if (keyboard.down("G")) cheating = !cheating;
 }
@@ -298,6 +303,7 @@ function removeAirplaneCollision() {
         if (player.life <= 0) {
           start = false;
           player.atingido();
+          sound.stop();
         }
         return;
       }
@@ -317,6 +323,7 @@ function removeAirplaneCollisionProjeteis() {
         if (player.life <= 0) {
           start = false;
           player.atingido();
+          sound.stop();
         }
         return;
       }
@@ -488,8 +495,6 @@ function gerTerrestrialEnemy(posx, posy, posz, speed, angleY) {
 }
 //--------------------Configs-----------------------------------
 
-
-
 function createPlanes() {
   //Criar plano
   plane = createGroundPlaneWired(planeSize, planeSize, 50, 50);
@@ -526,6 +531,7 @@ function detectCollisionCubes(object1, object2) {
 
 //---------------------------------------------------------
 function restart() {
+  sound.stop();
   enemyShot.forEach(function (item) {
     item.removed();
   });
@@ -553,7 +559,10 @@ function restart() {
     player.rotate();
     player.resetLife();
     resetSpheres();
+    sound.play();
   }, 1000);
+  
+  
 }
 
 function createPlayer() {
@@ -587,5 +596,6 @@ export {
   cameraHolder,
   detectCollisionCubes,
   removeFromScene,
-  camera,renderer
+  camera,
+  renderer,
 };
