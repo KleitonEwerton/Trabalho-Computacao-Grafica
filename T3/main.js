@@ -27,9 +27,13 @@ import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
 import { AirplaneEnemyDiagonal } from "./AirplaneEnemyDiagonal.js";
 import { TerrestrialEnemy } from "./terrestrialEnemy.js";
 
-import {removeFirstSphere,resetSpheres} from "./lifeSystem.js";
-import { updateLightPosition, targetObject, lightPosition } from "./lightSystem.js";
-import {rechargeBattery, createRechargeCSG} from "./rechargeSystem.js";
+import { removeFirstSphere, resetSpheres } from "./lifeSystem.js";
+import {
+  updateLightPosition,
+  targetObject,
+  lightPosition,
+} from "./lightSystem.js";
+import { rechargeBattery, createRechargeCSG } from "./rechargeSystem.js";
 
 let keyboard,
   renderer,
@@ -78,7 +82,6 @@ let enemyList = [];
 let landenemyList = [];
 let enemyShot = [];
 let contidos = [];
-
 
 resetSpheres();
 
@@ -161,18 +164,25 @@ function keyboardCamera() {
     )
       player.moveInZ(moveSpeedAirplane);
 
+    let inclination = false;
     if (
       keyboard.pressed("left") &&
       player.airplane.position.x + moveSpeedAirplane >= min_axle_x
-    )
+    ) {
       player.moveInX(-moveSpeedAirplane);
+      inclination = true;
+    }
 
     if (
       keyboard.pressed("right") &&
       player.airplane.position.x - moveSpeedAirplane <= max_axle_x
-    )
+    ) {
       player.moveInX(moveSpeedAirplane);
+      inclination = true;
+    }
 
+    if(!inclination)
+      player.resetInclination();
     if (keyboard.pressed("ctrl")) {
       if (atirar) {
         atirar = false;
@@ -598,6 +608,12 @@ function removeEnemyShot() {
   }
 }
 
-
-
-export { scene, scene2, player,start, cameraHolder, detectCollisionCubes, removeFromScene };
+export {
+  scene,
+  scene2,
+  player,
+  start,
+  cameraHolder,
+  detectCollisionCubes,
+  removeFromScene,
+};

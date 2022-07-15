@@ -3,14 +3,15 @@ import { AirMissile } from "./airMissile.js";
 import { LandMissile } from "./landMissile.js";
 
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
-import {scene} from "./main.js";
+import { scene } from "./main.js";
 
 let loader = new GLTFLoader();
 
 export class Airplanes {
-  constructor(posx, posy, posz, speed,path, geometry, material) {
+  constructor(posx, posy, posz, speed, path, geometry, material) {
     this.speed = speed;
     this.life = 5;
+    this.inclination = 0.0;
     const afterload = (object) => {
       this.obj = object;
       this.obj.castShadow = true;
@@ -45,8 +46,26 @@ export class Airplanes {
   }
 
   moveInX(qntMove) {
-    this.vectorPosition.x += 1.9 * qntMove;
-    this.airplane.position.lerp(this.vectorPosition, 5 * this.speed);
+    if (this.obj != undefined) {
+      this.vectorPosition.x += 1.9 * qntMove;
+      this.airplane.position.lerp(this.vectorPosition, 5 * this.speed);
+
+      if (qntMove > 0 && this.inclination > -30) {
+        this.obj.rotateX((-3 * Math.PI) / 180);
+        this.inclination -= 3;
+      } else if (this.inclination < 30) {
+        this.obj.rotateX((3 * Math.PI) / 180);
+        this.inclination += 3;
+      }
+    }
+  }
+
+  resetInclination(){
+
+    if(this.obj != undefined){
+      this.obj.rotateX(-this.inclination * (Math.PI / 180));
+      this.inclination = 0.0;
+    }
   }
 
   moveInZ(qntMove) {
@@ -106,16 +125,16 @@ export class Airplanes {
     for (let i = 0; i < 360; i += 0.01)
       if (this.obj != undefined) this.obj.rotateY(THREE.Math.degToRad(i));
   }
-  getLife(){
+  getLife() {
     return this.life;
   }
-  resetLife(){
+  resetLife() {
     this.life = 5;
   }
-  extraLife(){
+  extraLife() {
     this.life += 1;
   }
-  danoTomado(damage){
+  danoTomado(damage) {
     this.life = this.life - damage;
   }
 }
