@@ -179,6 +179,7 @@ function keyboardCamera() {
       player.airplane.position.x - moveSpeedAirplane <= max_axle_x
     ) {
       player.moveInX(moveSpeedAirplane);
+      
       inclination = true;
     }
 

@@ -28,13 +28,12 @@ export class LandMissileEnemy extends Projeteis {
     function loaderObject3D(PATH) {
       loader.load(PATH, function (object) {
         object.scene.position.set(posx, posy, posz);
-        object.scene.scale.set(0.5, 0.5, 0.5);
+        object.scene.scale.set(0.2, 0.2, 0.2);
         object.scene.rotateX(90 * (Math.PI / 180));
 
         afterload(object.scene);
       });
     }
-
     loaderObject3D("./assets/missil/scene.gltf");
   }
 

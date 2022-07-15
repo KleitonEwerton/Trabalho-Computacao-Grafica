@@ -6,7 +6,8 @@ import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import { scene } from "./main.js";
 
 let loader = new GLTFLoader();
-
+let max_inclination = 40;
+let inclination_per_click = 40;
 export class Airplanes {
   constructor(posx, posy, posz, speed, path, geometry, material) {
     this.speed = speed;
@@ -50,12 +51,13 @@ export class Airplanes {
       this.vectorPosition.x += 1.9 * qntMove;
       this.airplane.position.lerp(this.vectorPosition, 5 * this.speed);
 
-      if (qntMove > 0 && this.inclination > -30) {
-        this.obj.rotateX((-3 * Math.PI) / 180);
-        this.inclination -= 3;
-      } else if (this.inclination < 30) {
-        this.obj.rotateX((3 * Math.PI) / 180);
-        this.inclination += 3;
+      if (qntMove > 0 && this.inclination > -max_inclination) {
+        this.obj.rotateX((-inclination_per_click * Math.PI) / 180);
+        this.inclination -= inclination_per_click;
+        
+      } else if (qntMove < 0 && this.inclination < max_inclination) {
+        this.obj.rotateX((inclination_per_click * Math.PI) / 180);
+        this.inclination += inclination_per_click;
       }
     }
   }

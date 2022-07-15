@@ -3,7 +3,7 @@ import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import { AirMissile } from "./airMissile.js";
 import { Airplanes } from "./airplanes.js";
 
-const geometry = new THREE.ConeGeometry(2, 8, 30);
+const geometry = new THREE.ConeGeometry(1.9, 10, 30);
 let material = new THREE.MeshLambertMaterial({ color: 0x00ff000 });
 
 export class AirplanePlayer extends Airplanes{

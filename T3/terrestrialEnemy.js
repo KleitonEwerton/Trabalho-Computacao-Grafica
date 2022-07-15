@@ -19,7 +19,7 @@ export class TerrestrialEnemy extends AirplaneEnemy {
 
     let tir = new LandMissileEnemy(
       this.vectorPosition.x,
-      this.vectorPosition.y,
+      this.vectorPosition.y - 0.3,
       this.vectorPosition.z - 2,
       this.isEnemy,
       vectorPlayer
