@@ -27,18 +27,17 @@ import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
 import { AirplaneEnemyDiagonal } from "./AirplaneEnemyDiagonal.js";
 import { TerrestrialEnemy } from "./terrestrialEnemy.js";
 
+import {camera,cameraHolder,configCamera} from "./cameraSystem.js";
 import { removeFirstSphere, resetSpheres } from "./lifeSystem.js";
-import {
-  updateLightPosition,
-  targetObject,
-  lightPosition,
-} from "./lightSystem.js";
+import {updateLightPosition,targetObject,lightPosition} from "./lightSystem.js";
 import { rechargeBattery, createRechargeCSG } from "./rechargeSystem.js";
+
+import{audioLoader} from "./audioSystem.js";
 
 let keyboard,
   renderer,
-  camera,
-  cameraHolder,
+  
+
   plane,
   plane2,
   planeSize,
@@ -489,35 +488,7 @@ function gerTerrestrialEnemy(posx, posy, posz, speed, angleY) {
 }
 //--------------------Configs-----------------------------------
 
-function configCamera() {
-  //Cria a camera
-  camera = new THREE.PerspectiveCamera(
-    70,
-    window.innerWidth / window.innerHeight,
-    0.2,
-    1000
-  );
-  //configura a camera
-  camera.position.set(0, 0, 1);
-  camera.up.set(0, 0, 0);
-  camera.lookAt(0, 0, 0);
-  camera.rotateX(-1.7);
-  scene.add(camera);
 
-  window.addEventListener(
-    "resize",
-    function () {
-      onWindowResize(camera, renderer);
-    },
-    false
-  );
-
-  //Congigurações da camera holder
-  cameraHolder = new THREE.Object3D();
-  cameraHolder.add(camera);
-  cameraHolder.position.set(0, 30, 0);
-  scene.add(cameraHolder);
-}
 
 function createPlanes() {
   //Criar plano
@@ -616,4 +587,5 @@ export {
   cameraHolder,
   detectCollisionCubes,
   removeFromScene,
+  camera,renderer
 };
