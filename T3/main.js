@@ -2,15 +2,12 @@ import * as THREE from "three";
 
 import KeyboardState from "../libs/util/KeyboardState.js";
 
-import {
-  initRenderer,
-  onWindowResize,
-  createGroundPlaneWired,
-  createLightSphere,
-} from "../libs/util/util.js";
+import { onWindowResize, createGroundPlaneWired } from "../libs/util/util.js";
 
 import { enemys } from "./configs.js";
 import {
+  scene,
+  scene2,
   max_axle_x,
   min_axle_x,
   maxDistanceShot,
@@ -29,10 +26,12 @@ import { AirplaneEnemy } from "./airplaneEnemy.js";
 import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
 import { AirplaneEnemyDiagonal } from "./AirplaneEnemyDiagonal.js";
 import { TerrestrialEnemy } from "./terrestrialEnemy.js";
-import { Recharge } from "./recharge.js";
 
-let scene,
-  keyboard,
+import {removeFirstSphere,resetSpheres} from "./lifeSystem.js";
+import { updateLightPosition, targetObject, lightPosition } from "./lightSystem.js";
+import {rechargeBattery, createRechargeCSG} from "./rechargeSystem.js";
+
+let keyboard,
   renderer,
   camera,
   cameraHolder,
@@ -59,13 +58,6 @@ start = true;
 cheating = false;
 pause = false;
 
-//------------------------------------------------------------------------------------//
-
-scene = new THREE.Scene(); // Create main scene
-let scene2 = new THREE.Scene(); // Create main scene
-//renderer = initRenderer(); // Init a basic renderer
-//initDefaultBasicLight(scene); // Luz
-
 //----------------------------------- RENDERER ---------------------------------------//
 
 renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -73,33 +65,6 @@ document.getElementById("webgl-output").appendChild(renderer.domElement);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.VSMShadowMap; // default
-
-//------------------------------------------------------------------------------------//
-
-//----------------------------- CONFIGURAÇÕES DE LUZ ---------------------------------//
-
-let lightIntensity = 0.9;
-let lightPosition = new THREE.Vector3(0.0, 30.0, 0.0);
-let lightColor = "rgb(255,255,255)";
-
-// Sphere to represent the light
-let lightSphere = createLightSphere(scene, 2, 10, 10, lightPosition);
-
-let dirLight = new THREE.DirectionalLight(lightColor);
-
-setDirectionalLighting(lightPosition);
-updateLightIntensity();
-
-const shadowHelper = new THREE.CameraHelper(dirLight.shadow.camera);
-shadowHelper.visible = true;
-scene.add(shadowHelper);
-
-let targetObject = new THREE.Object3D();
-targetObject.position.set(0, 0, 0);
-scene.add(targetObject);
-
-dirLight.target = targetObject;
-scene.add(dirLight.target);
 
 //------------------------------------------------------------------------------------//
 
@@ -113,33 +78,7 @@ let enemyList = [];
 let landenemyList = [];
 let enemyShot = [];
 let contidos = [];
-let rechargeList = [];
-let sphereList = [];
 
-const geometry = new THREE.SphereGeometry(0.25, 32, 16);
-const material = new THREE.MeshPhongMaterial({ color: "rgb(220,20,60)" });
-
-const sphere = new THREE.Mesh(geometry, material);
-sphere.position.set(0.0, 3.0, 0.0);
-
-const sphere2 = new THREE.Mesh(geometry, material);
-sphere2.position.set(0.5, 3.0, 0.0);
-
-const sphere3 = new THREE.Mesh(geometry, material);
-sphere3.position.set(1, 3.0, 0.0);
-
-const sphere4 = new THREE.Mesh(geometry, material);
-sphere4.position.set(-0.5, 3.0, 0.0);
-
-const sphere5 = new THREE.Mesh(geometry, material);
-sphere5.position.set(-1, 3.0, 0.0);
-
-let auxListSphere = [];
-auxListSphere.push(sphere3);
-auxListSphere.push(sphere2);
-auxListSphere.push(sphere);
-auxListSphere.push(sphere4);
-auxListSphere.push(sphere5);
 
 resetSpheres();
 
@@ -390,7 +329,7 @@ function removeAirplaneOutPlane() {
   }
 }
 
-export function removeFromScene(obj, timeInSecond) {
+function removeFromScene(obj, timeInSecond) {
   setTimeout(function () {
     scene.remove(obj);
   }, timeInSecond * 1000); // funcao que remove da cena com uma animação
@@ -659,115 +598,6 @@ function removeEnemyShot() {
   }
 }
 
-function createRechargeCSG(posx) {
-  if (start) {
-    rechargeList.push(
-      new Recharge(
-        posx, //valor da coordenada x. minimo: -60 maximo 60
-        posInitPlayerY,
-        cameraHolder.position.z - maxDistanceShot, //Gera um z para distância inicial do inimigo. Distância minima: distância maxima do tir,  maxima:  distância maxima do tiro + 10
-        scene
-      )
-    );
-  }
-}
 
-function rechargeBattery() {
-  for (var i = 0; i < rechargeList.length; i++)
-    if (detectCollisionCubes(player.airplane, rechargeList[i].recargaObject)) {
-      removeFromScene(rechargeList[i].recargaObject, 0); //Remove da cena
-      removeFromScene(rechargeList[i].obj, 0); //Remove da cena
 
-      if (player.getLife() < 5) {
-        rechargeList.splice(i, 1);
-        player.extraLife();
-        recoverySphere();
-      }
-
-      return;
-    }
-}
-
-function setDirectionalLighting(position) {
-  dirLight.position.copy(position);
-  dirLight.castShadow = true;
-
-  // Shadow settings
-  dirLight.shadow.mapSize.width = 2048;
-  dirLight.shadow.mapSize.height = 2048;
-  dirLight.shadow.camera.near = 0.5;
-  dirLight.shadow.camera.far = 500;
-  dirLight.shadow.camera.left = -150;
-  dirLight.shadow.camera.right = 150;
-  dirLight.shadow.camera.bottom = -20;
-  dirLight.shadow.camera.top = 150;
-  dirLight.shadow.bias = -0.0005;
-
-  // No effect on Basic and PCFSoft
-  dirLight.shadow.radius = 4;
-
-  scene.add(dirLight);
-}
-
-// Update light intensity of the current light
-function updateLightIntensity() {
-  dirLight.intensity = lightIntensity;
-}
-
-// Update light position of the current light
-function updateLightPosition() {
-  dirLight.target.updateMatrixWorld();
-  dirLight.position.copy(lightPosition);
-  lightSphere.position.copy(lightPosition);
-  dirLight.shadow.camera.updateProjectionMatrix();
-  shadowHelper.update();
-}
-
-export function initLight(position) {
-  const ambientLight = new THREE.HemisphereLight(
-    "white", // bright sky color
-    "darkslategrey", // dim ground color
-    0.5 // intensity
-  );
-
-  const mainLight = new THREE.DirectionalLight("white", 0.7);
-  mainLight.position.copy(position);
-  mainLight.castShadow = true;
-
-  const shadow = mainLight.shadow;
-  shadow.mapSize.width = 1024;
-  shadow.mapSize.height = 1024;
-  shadow.camera.near = 0.1;
-  shadow.camera.far = 50;
-  shadow.camera.left = -100.0;
-  shadow.camera.right = 100.0;
-  shadow.camera.bottom = -100.0;
-  shadow.camera.top = 100.0;
-
-  scene.add(ambientLight);
-  scene.add(mainLight);
-
-  return mainLight;
-}
-
-function removeFirstSphere() {
-  scene2.remove(sphereList[0]);
-  sphereList.splice(0, 1);
-}
-
-function resetSpheres() {
-  sphereList.splice(0, sphereList.length);
-  auxListSphere.forEach((s) => {
-    sphereList.push(s);
-  });
-
-  sphereList.forEach((s) => {
-    scene2.add(s);
-  });
-}
-function recoverySphere() {
-  resetSpheres();
-  for (let i = 0; i < 5 - player.getLife(); i++) removeFirstSphere();
-}
-
-export { scene };
+export { scene, scene2, player,start, cameraHolder, detectCollisionCubes, removeFromScene };
