@@ -12,12 +12,13 @@ export class LandMissile extends Projeteis {
   constructor(posx, posy, posz, isEnemy, vectorPlayer) {
 
     super(posx, posy, posz, isEnemy, vectorPlayer, geometry,material);
-
+    this.initialPositionZ = posz;
   }
   moveInZ(qntMove, alpha, moveY = -1.25, limiteY = 3) {
     this.vectorPosition.z += 2*qntMove;
-    if(moveY && moveY + this.vectorPosition.y > limiteY) 
+    if(moveY && moveY + this.vectorPosition.y > limiteY ) 
       this.vectorPosition.y += moveY;
+
     this.shot.position.lerp(this.vectorPosition, alpha);
     
   }

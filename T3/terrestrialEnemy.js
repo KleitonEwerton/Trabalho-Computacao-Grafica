@@ -7,7 +7,7 @@ const geometry = new THREE.BoxGeometry(6, 18, 22);
 
 export class TerrestrialEnemy extends AirplaneEnemy {
   constructor(posx, posy, posz, speed,angleY) {
-    super(posx, posy - 3, posz, speed, angleY, "./assets/vestram/scene.gltf", geometry, 1);
+    super(posx, posy - 3, posz, speed, angleY, "./assets/enemy4/scene.gltf", geometry, 1);
     removeFromScene(this.cube);
   }
 
@@ -21,7 +21,6 @@ export class TerrestrialEnemy extends AirplaneEnemy {
       this.vectorPosition.x,
       this.vectorPosition.y - 0.3,
       this.vectorPosition.z - 2,
-      this.isEnemy,
       vectorPlayer
     );
     tir.rotateX();

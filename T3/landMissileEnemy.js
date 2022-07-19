@@ -12,12 +12,11 @@ let material = new THREE.MeshLambertMaterial();
 
 */
 export class LandMissileEnemy extends Projeteis {
-  constructor(posx, posy, posz, isEnemy, vectorPlayer) {
-    super(posx, posy, posz, false, vectorPlayer, geometry, material);
+  constructor(posx, posy, posz, vectorPlayer) {
+    super(posx, posy, posz, true, vectorPlayer, geometry, material);
     scene.remove(this.shot);
     this.angleToUpper = 90;
     this.chegouAoTop = false;
-    this.enemy = isEnemy;
     this.damage = 2;
 
     const afterload = (object) => {

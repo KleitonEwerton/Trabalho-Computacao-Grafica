@@ -11,6 +11,7 @@ let inclination_per_click = 40;
 export class Airplanes {
   constructor(posx, posy, posz, speed, path, geometry, material) {
     this.speed = speed;
+    this.isEnemy = true;
     this.life = 5;
     this.inclination = 0.0;
     const afterload = (object) => {
@@ -102,7 +103,7 @@ export class Airplanes {
       this.vectorPosition.x,
       this.vectorPosition.y,
       this.vectorPosition.z - 2,
-      false,
+      this.isEnemy,
       this.getVectorPosition()
     );
   
@@ -114,7 +115,7 @@ export class Airplanes {
       this.vectorPosition.x,
       this.vectorPosition.y,
       this.vectorPosition.z - 2,
-      false,
+      this.isEnemy,
       this.getVectorPosition()
     );
     scene.add(tir.tiro());

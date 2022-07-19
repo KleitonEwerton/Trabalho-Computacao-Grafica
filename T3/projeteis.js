@@ -1,12 +1,10 @@
 import * as THREE from "three";
 import { scene, removeFromScene } from "./main.js";
-import { listener } from "./audioSystem.js";
-
-const audioLoader = new THREE.AudioLoader();
+import { listener, audioLoader } from "./audioSystem.js";
 
 export class Projeteis {
   constructor(posx, posy, posz, isEnemy, vectorPlayer, geometry, material) {
-    this.enemy = isEnemy;
+    this.isEnemy = isEnemy;
     this.shot = new THREE.Mesh(geometry, material);
 
     this.shot.position.set(posx, posy, posz);
@@ -19,17 +17,19 @@ export class Projeteis {
       this.shot.lookAt(vectorPlayer);
     }
 
-    const load = (thing) => {
-      this.shot.add(thing);
-    };
-    
-    if (!isEnemy) {
-      let sound = new THREE.Audio(listener);
+    if (!this.isEnemy) {
+      this.sound = new THREE.Audio(listener);
+
+      //Function to set loader in this.sound
+      const load = (buffer) => {
+        this.sound.setBuffer(buffer);//Set buffer in obj shot
+        this.sound.setVolume(0.1); //Volume
+        this.sound.play(); //Start sound
+        this.shot.add(this.sound); //Add sound in obj shot
+      };
+
       audioLoader.load("assets/sounds/pulsar.mp3", function (buffer) {
-        sound.setBuffer(buffer);
-        sound.setVolume(0.5);
-        sound.play();
-        load(sound);
+        load(buffer);//Call function load, to upload buffer
       });
     }
 
@@ -52,6 +52,8 @@ export class Projeteis {
     return this.vectorPosition;
   }
   removed(time = 0) {
+    if(this.sound)
+      this.sound.stop();
     removeFromScene(this.shot, time * 1000);
   }
 }

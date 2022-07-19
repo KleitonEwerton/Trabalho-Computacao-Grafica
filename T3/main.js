@@ -305,6 +305,7 @@ function removeAirplaneCollision() {
           start = false;
           player.atingido();
           sound.stop();
+          removeAllEnemyShots();
         }
         return;
       }
@@ -325,6 +326,7 @@ function removeAirplaneCollisionProjeteis() {
           start = false;
           player.atingido();
           sound.stop();
+          removeAllEnemyShots();
         }
         return;
       }
@@ -531,12 +533,16 @@ function detectCollisionCubes(object1, object2) {
 }
 
 //---------------------------------------------------------
-function restart() {
-  sound.stop();
+function removeAllEnemyShots(){
   enemyShot.forEach(function (item) {
     item.removed();
   });
   enemyShot.splice(0, enemyShot.length);
+}
+
+function restart() {
+  sound.stop();
+  removeAllEnemyShots();
   contidos.splice(0, contidos.length);
 
   setTimeout(function () {

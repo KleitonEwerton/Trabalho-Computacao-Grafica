@@ -1,4 +1,5 @@
 import * as THREE from "three";
+
 // create an AudioListener and add it to the camera
 const listener = new THREE.AudioListener();
 
@@ -8,16 +9,11 @@ const sound = new THREE.Audio(listener);
 // load a sound and set it as the Audio object's buffer
 const audioLoader = new THREE.AudioLoader();
 
-try {
-  audioLoader.load("assets/sounds/bg.mp3", function (buffer) {
-    sound.setBuffer(buffer);
-    sound.setLoop(true);
-    sound.setVolume(0.5);
-    //sound.play();
-  });
-} catch (e) {
-  console.log("Audio de ambiente não encontrado");
-}
+audioLoader.load("assets/sounds/bg.mp3", function (buffer) {
+  sound.setBuffer(buffer);
+  sound.setLoop(true);
+  sound.setVolume(0.2);
+  sound.play();
+});
 
-
-export { audioLoader, sound, listener};
+export { audioLoader, sound, listener };
