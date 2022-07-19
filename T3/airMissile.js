@@ -12,6 +12,7 @@ export class AirMissile extends Projeteis {
 
   constructor(posx, posy, posz, isEnemy, vectorPlayer) {
     super(posx, posy, posz, isEnemy, vectorPlayer, geometry,material);
+    
   }
   
 }

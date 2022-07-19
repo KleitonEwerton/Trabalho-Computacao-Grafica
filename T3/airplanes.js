@@ -105,6 +105,7 @@ export class Airplanes {
       false,
       this.getVectorPosition()
     );
+  
     scene.add(tir.tiro());
     tiros.push(tir);
   }
