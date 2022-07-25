@@ -74,7 +74,7 @@ var virtualCamera = new THREE.PerspectiveCamera(
   20.0
 );
 
-init();
+// init();
 
 export function init() {
   keyboard = new KeyboardState();
