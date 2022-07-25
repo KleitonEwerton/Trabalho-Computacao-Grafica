@@ -1,4 +1,12 @@
 import * as THREE from "three";
+import {init} from "./main.js";
+
+const startButton = document.getElementById( 'startButton' );
+// startButton.addEventListener('click',()=>{
+
+//   init();
+
+// });
 
 // create an AudioListener and add it to the camera
 const listener = new THREE.AudioListener();

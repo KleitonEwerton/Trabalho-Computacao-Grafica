@@ -52,55 +52,85 @@ let keyboard,
   pause,
   cheating;
 
-//----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
-keyboard = new KeyboardState();
+  let shotsList = [];
+  let landShotsList = [];
+  let enemyList = [];
+  let landenemyList = [];
+  let enemyShot = [];
+  let contidos = [];
 
-planeSize = 500; //Tamanho do plano
-speed = 0.1;
-moveSpeedAirplane = 0.4;
+  //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
 
-start = true;
-cheating = false;
-pause = false;
+  //camera virtual usada para visualização das esferas da vida
+  var lookAtVec = new THREE.Vector3(0.0, 3.0, 0.0);
+  var camPosition = new THREE.Vector3(0.0, 3.0, 2.0);
+  var upVec = new THREE.Vector3(0.0, 1.0, 0.0);
+  var vcWidth = 200;
+  var vcHeidth = 100;
+  var virtualCamera = new THREE.PerspectiveCamera(
+    45,
+    vcWidth / vcHeidth,
+    1.0,
+    20.0
+  );
 
-//----------------------------------- RENDERER ---------------------------------------//
+init();
 
-renderer = new THREE.WebGLRenderer({ alpha: true });
-document.getElementById("webgl-output").appendChild(renderer.domElement);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.VSMShadowMap; // default
+export function init() {
+  keyboard = new KeyboardState();
 
-//------------------------------------------------------------------------------------//
+  planeSize = 500; //Tamanho do plano
+  speed = 0.1;
+  moveSpeedAirplane = 0.4;
 
-configCamera();
-createPlanes();
-createPlayer();
+  start = true;
+  cheating = false;
+  pause = false;
 
-let shotsList = [];
-let landShotsList = [];
-let enemyList = [];
-let landenemyList = [];
-let enemyShot = [];
-let contidos = [];
+  //----------------------------------- RENDERER ---------------------------------------//
 
-resetSpheres();
+  renderer = new THREE.WebGLRenderer({ alpha: true });
+  document.getElementById("webgl-output").appendChild(renderer.domElement);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.VSMShadowMap; // default
 
-//camera virtual usada para visualização das esferas da vida
-var lookAtVec = new THREE.Vector3(0.0, 3.0, 0.0);
-var camPosition = new THREE.Vector3(0.0, 3.0, 2.0);
-var upVec = new THREE.Vector3(0.0, 1.0, 0.0);
-var vcWidth = 200;
-var vcHeidth = 100;
-var virtualCamera = new THREE.PerspectiveCamera(
-  45,
-  vcWidth / vcHeidth,
-  1.0,
-  20.0
-);
-virtualCamera.position.copy(camPosition);
-virtualCamera.up.copy(upVec);
-virtualCamera.lookAt(lookAtVec);
+  //------------------------------------------------------------------------------------//
+
+  configCamera();
+  createPlanes();
+  createPlayer();
+
+
+  resetSpheres();
+
+  
+  virtualCamera.position.copy(camPosition);
+  virtualCamera.up.copy(upVec);
+  virtualCamera.lookAt(lookAtVec);
+
+
+  render();
+  renderer.autoClear = false;
+  //funcao assincrona que realiza os disparos
+  const myIntervalShots = window.setInterval(function () {
+    if (start)
+      enemyList.forEach((enemy) => {
+        if (
+          cameraHolder.position.distanceTo(enemy.getVectorPosition()) <
+          maxDistanceShot
+        )
+          enemy.shot(enemyShot, player.getVectorPosition());
+      });
+    landenemyList.forEach((enemy) => {
+      if (
+        cameraHolder.position.distanceTo(enemy.getVectorPosition()) <
+        maxDistanceShot
+      )
+        enemy.shot(enemyShot, player.getVectorPosition());
+    });
+  }, 1000 / enemyShotPerSecond);
+}
 
 function controlledRender() {
   var width = window.innerWidth;
@@ -121,28 +151,6 @@ function controlledRender() {
 
   renderer.render(scene2, virtualCamera); // Render scene of the virtual camera
 }
-
-render();
-renderer.autoClear = false;
-//funcao assincrona que realiza os disparos
-const myIntervalShots = window.setInterval(function () {
-  if (start)
-    enemyList.forEach((enemy) => {
-      if (
-        cameraHolder.position.distanceTo(enemy.getVectorPosition()) <
-        maxDistanceShot
-      )
-        enemy.shot(enemyShot, player.getVectorPosition());
-    });
-  landenemyList.forEach((enemy) => {
-    if (
-      cameraHolder.position.distanceTo(enemy.getVectorPosition()) <
-      maxDistanceShot
-    )
-      enemy.shot(enemyShot, player.getVectorPosition());
-  });
-}, 1000 / enemyShotPerSecond);
-
 //----------------------- Controles ----------------------------------
 let atirarM = true;
 let atirar = true;
@@ -179,7 +187,7 @@ function keyboardCamera() {
       player.airplane.position.x - moveSpeedAirplane <= max_axle_x
     ) {
       player.moveInX(moveSpeedAirplane);
-      
+
       inclination = true;
     }
 
@@ -533,7 +541,7 @@ function detectCollisionCubes(object1, object2) {
 }
 
 //---------------------------------------------------------
-function removeAllEnemyShots(){
+function removeAllEnemyShots() {
   enemyShot.forEach(function (item) {
     item.removed();
   });
@@ -568,8 +576,6 @@ function restart() {
     resetSpheres();
     sound.play();
   }, 1000);
-  
-  
 }
 
 function createPlayer() {
