@@ -52,27 +52,27 @@ let keyboard,
   pause,
   cheating;
 
-  let shotsList = [];
-  let landShotsList = [];
-  let enemyList = [];
-  let landenemyList = [];
-  let enemyShot = [];
-  let contidos = [];
+let shotsList = [];
+let landShotsList = [];
+let enemyList = [];
+let landenemyList = [];
+let enemyShot = [];
+let contidos = [];
 
-  //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
+//----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
 
-  //camera virtual usada para visualização das esferas da vida
-  var lookAtVec = new THREE.Vector3(0.0, 3.0, 0.0);
-  var camPosition = new THREE.Vector3(0.0, 3.0, 2.0);
-  var upVec = new THREE.Vector3(0.0, 1.0, 0.0);
-  var vcWidth = 200;
-  var vcHeidth = 100;
-  var virtualCamera = new THREE.PerspectiveCamera(
-    45,
-    vcWidth / vcHeidth,
-    1.0,
-    20.0
-  );
+//camera virtual usada para visualização das esferas da vida
+var lookAtVec = new THREE.Vector3(0.0, 3.0, 0.0);
+var camPosition = new THREE.Vector3(0.0, 3.0, 2.0);
+var upVec = new THREE.Vector3(0.0, 1.0, 0.0);
+var vcWidth = 200;
+var vcHeidth = 100;
+var virtualCamera = new THREE.PerspectiveCamera(
+  45,
+  vcWidth / vcHeidth,
+  1.0,
+  20.0
+);
 
 init();
 
@@ -101,14 +101,11 @@ export function init() {
   createPlanes();
   createPlayer();
 
-
   resetSpheres();
 
-  
   virtualCamera.position.copy(camPosition);
   virtualCamera.up.copy(upVec);
   virtualCamera.lookAt(lookAtVec);
-
 
   render();
   renderer.autoClear = false;
@@ -192,6 +189,10 @@ function keyboardCamera() {
     }
 
     if (!inclination) player.resetInclination();
+
+    if (keyboard.down("ctrl")) {
+      if (!atirar) player.shot(scene, shotsList);
+    }
     if (keyboard.pressed("ctrl")) {
       if (atirar) {
         atirar = false;
@@ -200,6 +201,10 @@ function keyboardCamera() {
           player.shot(scene, shotsList);
         }, 1000 / shotPerSecond);
       }
+    }
+
+    if (keyboard.down("space")) {
+      if (!atirarM) player.shotLand(scene, landShotsList);
     }
 
     if (keyboard.pressed("space")) {
