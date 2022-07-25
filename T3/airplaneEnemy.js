@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { AirMissile } from "./airMissile.js";
-import { LandMissile } from "./landMissile.js";
-import { Airplanes } from "./airplanes.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
-import { scene, removeFromScene } from "./main.js";
+import { scene} from "./main.js";
+import { audioLoader, listener } from "./audioSystem.js";
+
 
 const geometry = new THREE.BoxGeometry(7, 2, 7);
 let material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
@@ -45,6 +45,16 @@ export class AirplaneEnemy {
     this.vectorPosition = new THREE.Vector3();
     this.vectorPosition.copy(this.cube.position);
     //scene.add(this.cube); //! Para ver o quadrado retire o comentário dessa linha
+
+    this.sound = new THREE.Audio(listener);
+    const load = (buffer) => {
+      this.sound.setBuffer(buffer); //Set buffer in obj shot
+      this.sound.setVolume(0.2); //Volume
+    };
+    audioLoader.load("assets/sounds/explosionAirplanes.mp3", function (buffer) {
+      load(buffer);
+    });
+
   }
   cube() {
     return this.cube();
@@ -85,6 +95,7 @@ export class AirplaneEnemy {
 
 
   rotate() {
+    this.sound.play();
     for (let i = 0; i < 10; i += 0.001)
       if (this.obj != undefined) this.obj.rotateY(THREE.Math.degToRad(i));
   }

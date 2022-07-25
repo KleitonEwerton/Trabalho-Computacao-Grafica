@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { scene, removeFromScene } from "./main.js";
 import { listener, audioLoader } from "./audioSystem.js";
 
+let pathSound;
 export class Projeteis {
   constructor(posx, posy, posz, isEnemy, vectorPlayer, geometry, material) {
     this.isEnemy = isEnemy;
@@ -15,9 +16,12 @@ export class Projeteis {
 
     if (isEnemy) {
       this.shot.lookAt(vectorPlayer);
+      pathSound = "assets/sounds/shotEnemy.mp3";
+    }else{
+      pathSound = "assets/sounds/pulsar.mp3";
+
     }
 
-    if (!this.isEnemy) {
       this.sound = new THREE.Audio(listener);
 
       //Function to set loader in this.sound
@@ -28,10 +32,10 @@ export class Projeteis {
         this.shot.add(this.sound); //Add sound in obj shot
       };
 
-      audioLoader.load("assets/sounds/pulsar.mp3", function (buffer) {
+      audioLoader.load(pathSound, function (buffer) {
         load(buffer);//Call function load, to upload buffer
       });
-    }
+    
 
     scene.add(this.shot);
   }
@@ -52,8 +56,7 @@ export class Projeteis {
     return this.vectorPosition;
   }
   removed(time = 0) {
-    if(this.sound)
-      this.sound.stop();
+    this.sound.stop();
     removeFromScene(this.shot, time * 1000);
   }
 }

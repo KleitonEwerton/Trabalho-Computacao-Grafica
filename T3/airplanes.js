@@ -4,6 +4,7 @@ import { LandMissile } from "./landMissile.js";
 
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import { scene } from "./main.js";
+import { audioLoader, listener } from "./audioSystem.js";
 
 let loader = new GLTFLoader();
 let max_inclination = 40;
@@ -42,6 +43,14 @@ export class Airplanes {
     this.vectorPosition.copy(this.airplane.position);
 
     //scene.add(this.airplane);  //! Para ver o cone retire o comentário dessa linha
+    this.sound = new THREE.Audio(listener);
+    const load = (buffer) => {
+      this.sound.setBuffer(buffer); //Set buffer in obj shot
+      this.sound.setVolume(0.2); //Volume
+    };
+    audioLoader.load("assets/sounds/explosionAirplanes.mp3", function (buffer) {
+      load(buffer);
+    });
   }
   airplane() {
     return this.airplane;
@@ -55,7 +64,6 @@ export class Airplanes {
       if (qntMove > 0 && this.inclination > -max_inclination) {
         this.obj.rotateX((-inclination_per_click * Math.PI) / 180);
         this.inclination -= inclination_per_click;
-        
       } else if (qntMove < 0 && this.inclination < max_inclination) {
         this.obj.rotateX((inclination_per_click * Math.PI) / 180);
         this.inclination += inclination_per_click;
@@ -63,9 +71,8 @@ export class Airplanes {
     }
   }
 
-  resetInclination(){
-
-    if(this.obj != undefined){
+  resetInclination() {
+    if (this.obj != undefined) {
       this.obj.rotateX(-this.inclination * (Math.PI / 180));
       this.inclination = 0.0;
     }
@@ -106,7 +113,7 @@ export class Airplanes {
       this.isEnemy,
       this.getVectorPosition()
     );
-  
+
     scene.add(tir.tiro());
     tiros.push(tir);
   }
@@ -123,11 +130,14 @@ export class Airplanes {
   }
 
   atingido() {
+    this.sound.play();
+
     this.rotate();
   }
   rotate() {
-    for (let i = 0; i < 360; i += 0.01)
-      if (this.obj != undefined) this.obj.rotateY(THREE.Math.degToRad(i));
+    for (let i = 0; i < 180; i += 1)
+      if (this.obj != undefined) 
+        this.obj.rotateY(Math.PI /180);
   }
   getLife() {
     return this.life;
