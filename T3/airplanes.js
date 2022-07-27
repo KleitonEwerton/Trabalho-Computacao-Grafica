@@ -5,6 +5,7 @@ import { LandMissile } from "./landMissile.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import { scene } from "./main.js";
 import { audioLoader, listener } from "./audioSystem.js";
+import {explosionSoundVolume} from "./controllers.js";
 
 let loader = new GLTFLoader();
 let max_inclination = 40;
@@ -46,7 +47,7 @@ export class Airplanes {
     this.sound = new THREE.Audio(listener);
     const load = (buffer) => {
       this.sound.setBuffer(buffer); //Set buffer in obj shot
-      this.sound.setVolume(0.2); //Volume
+      this.sound.setVolume(explosionSoundVolume); //Volume
     };
     audioLoader.load("assets/sounds/explosionAirplanes.mp3", function (buffer) {
       load(buffer);

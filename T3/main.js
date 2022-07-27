@@ -1,5 +1,4 @@
 import * as THREE from "three";
-
 import KeyboardState from "../libs/util/KeyboardState.js";
 
 import { onWindowResize, createGroundPlaneWired } from "../libs/util/util.js";
@@ -27,7 +26,7 @@ import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
 import { AirplaneEnemyDiagonal } from "./AirplaneEnemyDiagonal.js";
 import { TerrestrialEnemy } from "./terrestrialEnemy.js";
 
-import { camera, cameraHolder, configCamera } from "./cameraSystem.js";
+// import { camera, cameraHolder, configCamera } from "./cameraSystem.js";
 import { removeFirstSphere, resetSpheres } from "./lifeSystem.js";
 import {
   updateLightPosition,
@@ -36,7 +35,7 @@ import {
 } from "./lightSystem.js";
 import { rechargeBattery, createRechargeCSG } from "./rechargeSystem.js";
 
-import { audioLoader, sound } from "./audioSystem.js";
+import { sound } from "./audioSystem.js";
 
 let keyboard,
   renderer,
@@ -50,7 +49,9 @@ let keyboard,
   moveSpeedAirplane,
   start,
   pause,
-  cheating;
+  cheating,
+  camera,
+  cameraHolder;
 
 let shotsList = [];
 let landShotsList = [];
@@ -73,8 +74,6 @@ var virtualCamera = new THREE.PerspectiveCamera(
   1.0,
   20.0
 );
-
-
 
 export function init() {
   keyboard = new KeyboardState();
@@ -108,10 +107,11 @@ export function init() {
   virtualCamera.lookAt(lookAtVec);
 
   render();
+
   renderer.autoClear = false;
   //funcao assincrona que realiza os disparos
   const myIntervalShots = window.setInterval(function () {
-    if (start)
+    if (start && !pause) {
       enemyList.forEach((enemy) => {
         if (
           cameraHolder.position.distanceTo(enemy.getVectorPosition()) <
@@ -119,14 +119,45 @@ export function init() {
         )
           enemy.shot(enemyShot, player.getVectorPosition());
       });
-    landenemyList.forEach((enemy) => {
-      if (
-        cameraHolder.position.distanceTo(enemy.getVectorPosition()) <
-        maxDistanceShot
-      )
-        enemy.shot(enemyShot, player.getVectorPosition());
-    });
+      landenemyList.forEach((enemy) => {
+        if (
+          cameraHolder.position.distanceTo(enemy.getVectorPosition()) <
+          maxDistanceShot
+        )
+          enemy.shot(enemyShot, player.getVectorPosition());
+      });
+    }
   }, 1000 / enemyShotPerSecond);
+}
+
+function configCamera() {
+  //Cria a camera
+  camera = new THREE.PerspectiveCamera(
+    70,
+    window.innerWidth / window.innerHeight,
+    0.2,
+    1000
+  );
+  //configura a camera
+  camera.position.set(0, 0, 1);
+  camera.up.set(0, 0, 0);
+  camera.lookAt(0, 0, 0);
+  camera.rotateX(-1.7);
+  scene.add(camera);
+
+  window.addEventListener(
+    "resize",
+    function () {
+      onWindowResize(camera, renderer);
+    },
+    false
+  );
+
+  //Congigurações da camera holder
+  cameraHolder = new THREE.Object3D();
+  cameraHolder.add(camera);
+  cameraHolder.position.set(0, 30, 0);
+  scene.add(cameraHolder);
 }
 
 function controlledRender() {
@@ -221,8 +252,9 @@ function keyboardCamera() {
 
   if (keyboard.down("P")) {
     pause = !pause;
-    if (pause) sound.pause();
-    else sound.play();
+    if (pause) {
+      sound.pause();
+    } else sound.play();
   }
 
   if (keyboard.down("G")) cheating = !cheating;
@@ -319,6 +351,7 @@ function removeAirplaneCollision() {
           player.atingido();
           sound.stop();
           removeAllEnemyShots();
+          removeAllShotsPlayer();
         }
         return;
       }
@@ -340,6 +373,7 @@ function removeAirplaneCollisionProjeteis() {
           player.atingido();
           sound.stop();
           removeAllEnemyShots();
+          removeAllShotsPlayer();
         }
         return;
       }
@@ -445,56 +479,59 @@ function gerEnemysByConfigs() {
   if (enemy != undefined && contidos.indexOf(posCam) == -1) {
     contidos.push(posCam);
 
-    let enemy_local;
     switch (enemy["type"]) {
       case "parable":
-        enemy_local = gerAirplaneEnemyParable(
-          enemy["posx"],
-          enemy["posy"],
-          cameraHolder.position.z - 150,
-          speedEnemy * enemy["alphaSpeed"],
+        enemyList.push(
+          gerAirplaneEnemyParable(
+            enemy["posx"],
+            enemy["posy"],
+            cameraHolder.position.z - 150,
+            speedEnemy * enemy["alphaSpeed"],
 
-          enemy["angleY"]
+            enemy["angleY"]
+          )
         );
-        break;
-
+        return;
       case "diagonal":
-        enemy_local = gerAirplaneEnemyDiagonal(
-          enemy["posx"],
-          enemy["posy"],
-          cameraHolder.position.z - 150,
-          speedEnemy * enemy["alphaSpeed"],
+        enemyList.push(
+          gerAirplaneEnemyDiagonal(
+            enemy["posx"],
+            enemy["posy"],
+            cameraHolder.position.z - 150,
+            speedEnemy * enemy["alphaSpeed"],
 
-          enemy["angleY"]
+            enemy["angleY"]
+          )
         );
-        break;
+        return;
       case "normal":
-        enemy_local = gerAirplaneEnemyNormal(
-          enemy["posx"],
-          enemy["posy"],
-          cameraHolder.position.z - 150,
-          speedEnemy * enemy["alphaSpeed"]
+        enemyList.push(
+          gerAirplaneEnemyNormal(
+            enemy["posx"],
+            enemy["posy"],
+            cameraHolder.position.z - 150,
+            speedEnemy * enemy["alphaSpeed"]
+          )
         );
-        break;
+        return;
 
       case "terrestrial":
-        enemy_local = gerTerrestrialEnemy(
-          enemy["posx"],
-          enemy["posy"],
-          cameraHolder.position.z - 150,
-          speedEnemy * enemy["alphaSpeed"],
+        landenemyList.push(
+          gerTerrestrialEnemy(
+            enemy["posx"],
+            enemy["posy"],
+            cameraHolder.position.z - 150,
+            speedEnemy * enemy["alphaSpeed"],
 
-          enemy["angleY"]
+            enemy["angleY"]
+          )
         );
-        landenemyList.push(enemy_local);
         return;
 
       case "recharge":
         createRechargeCSG(enemy["posx"]);
         return;
     }
-
-    enemyList.push(enemy_local);
   }
 }
 function gerAirplaneEnemyNormal(posx, posy, posz, speed, angleY) {
@@ -551,11 +588,24 @@ function removeAllEnemyShots() {
     item.removed();
   });
   enemyShot.splice(0, enemyShot.length);
+
+  landShotsList.forEach(function (item) {
+    item.removed();
+  });
+  landShotsList.splice(0, landShotsList.length);
+}
+
+function removeAllShotsPlayer() {
+  shotsList.forEach(function (item) {
+    item.removed();
+  });
+  shotsList.splice(0, shotsList.length);
 }
 
 function restart() {
   sound.stop();
   removeAllEnemyShots();
+  removeAllShotsPlayer();
   contidos.splice(0, contidos.length);
 
   setTimeout(function () {

@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { Projeteis } from "./projeteis.js";
-import { loader } from "./controllers.js";
+import { loader, landEnemyMissileScale} from "./controllers.js";
 import { scene, removeFromScene } from "./main.js";
 
-const geometry = new THREE.BoxGeometry(0.8, 0.8, 2.5);
+const geometry = new THREE.BoxGeometry(1, 1, 3);
 let material = new THREE.MeshLambertMaterial();
 
 /*
@@ -27,7 +27,7 @@ export class LandMissileEnemy extends Projeteis {
     function loaderObject3D(PATH) {
       loader.load(PATH, function (object) {
         object.scene.position.set(posx, posy, posz);
-        object.scene.scale.set(0.2, 0.2, 0.2);
+        object.scene.scale.set(landEnemyMissileScale, landEnemyMissileScale, landEnemyMissileScale);
         object.scene.rotateX(90 * (Math.PI / 180));
 
         afterload(object.scene);

@@ -1,22 +1,9 @@
 import * as THREE from "three";
-import { init } from "./main.js";
-
-const startButton = document.getElementById("startButton");
-const loader = document.getElementById("loader");
-var loaded = false;
-
-startButton.addEventListener("click", () => {
-  if (loaded) {
-    init();
-    sound.play();
-    startButton.style.display = "none";
-    document.getElementById("flex-box").style.display="none";
-  }
-});
+import {loader} from "./gameSystem.js";
 
 // create an AudioListener and add it to the camera
 const listener = new THREE.AudioListener();
-
+var loaded = false;
 // create a global audio source
 const sound = new THREE.Audio(listener);
 
@@ -34,4 +21,4 @@ await audioLoader.load("assets/sounds/bg.mp3", function (buffer) {
   startButton.style.backgroundColor = "white";
 });
 
-export { audioLoader, sound, listener };
+export { audioLoader, sound, listener, loaded };

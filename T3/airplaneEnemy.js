@@ -1,22 +1,31 @@
 import * as THREE from "three";
 import { AirMissile } from "./airMissile.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
-import { scene} from "./main.js";
+import { scene } from "./main.js";
 import { audioLoader, listener } from "./audioSystem.js";
-
+import { explosionSoundVolume } from "./controllers.js";
 
 const geometry = new THREE.BoxGeometry(7, 2, 7);
 let material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
 let loader = new GLTFLoader();
 
 export class AirplaneEnemy {
-  constructor(posx, posy, posz, speed, angleY = 0, path = "./assets/enemy1/scene.gltf", geometry_obj = geometry, scale=1.5) {
+  constructor(
+    posx,
+    posy,
+    posz,
+    speed,
+    angleY = 0,
+    path = "./assets/enemy1/scene.gltf",
+    geometry_obj = geometry,
+    scale = 1.5
+  ) {
     this.isEnemy = true;
     this.speed = speed;
     this.cube = new THREE.Mesh(geometry_obj, material);
     this.cube.position.set(posx, posy, posz);
     this.cube.rotateY(angleY * (Math.PI / 180));
-    
+
     //! Função auxiliar para trabalhar com a função assincrona loaderObject3D
     const afterload = (object) => {
       this.obj = object;
@@ -31,9 +40,8 @@ export class AirplaneEnemy {
         object.scene.scale.set(scale, scale, scale);
         object.scene.rotateY(angleY * (Math.PI / 180));
 
-        object.scene.traverse(function(child) {
-          if(child)
-          child.castShadow = true;
+        object.scene.traverse(function (child) {
+          if (child) child.castShadow = true;
         });
 
         afterload(object.scene);
@@ -49,12 +57,11 @@ export class AirplaneEnemy {
     this.sound = new THREE.Audio(listener);
     const load = (buffer) => {
       this.sound.setBuffer(buffer); //Set buffer in obj shot
-      this.sound.setVolume(0.2); //Volume
+      this.sound.setVolume(explosionSoundVolume); //Volume
     };
     audioLoader.load("assets/sounds/explosionAirplanes.mp3", function (buffer) {
       load(buffer);
     });
-
   }
   cube() {
     return this.cube();
@@ -92,7 +99,6 @@ export class AirplaneEnemy {
 
     tiros.push(tir);
   }
-
 
   rotate() {
     this.sound.play();

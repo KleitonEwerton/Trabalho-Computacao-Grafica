@@ -1,12 +1,11 @@
 import { Recharge } from "./recharge.js";
-import { player, start, cameraHolder, detectCollisionCubes, removeFromScene } from "./main.js";
+import { player, cameraHolder, detectCollisionCubes, removeFromScene } from "./main.js";
 import { scene, maxDistanceShot, posInitPlayerY } from "./controllers.js";
 import {recoverySphere } from "./lifeSystem.js";
 
 let rechargeList = [];
 
 function createRechargeCSG(posx) {
-  if (start) {
     rechargeList.push(
       new Recharge(
         posx, //valor da coordenada x. minimo: -60 maximo 60
@@ -15,7 +14,7 @@ function createRechargeCSG(posx) {
         scene
       )
     );
-  }
+  
 }
 
 function rechargeBattery() {
@@ -23,9 +22,9 @@ function rechargeBattery() {
     if (detectCollisionCubes(player.airplane, rechargeList[i].recargaObject)) {
       removeFromScene(rechargeList[i].recargaObject, 0); //Remove da cena
       removeFromScene(rechargeList[i].obj, 0); //Remove da cena
+      rechargeList.splice(i, 1);
 
       if (player.getLife() < 5) {
-        rechargeList.splice(i, 1);
         player.extraLife();
         recoverySphere();
       }
