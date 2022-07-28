@@ -23,7 +23,7 @@ import { distanceBetweenTwoPointsXZ } from "./utils.js";
 import { AirplanePlayer } from "./airplanePlayer.js";
 import { AirplaneEnemy } from "./airplaneEnemy.js";
 import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
-import { AirplaneEnemyDiagonal } from "./AirplaneEnemyDiagonal.js";
+import { AirplaneEnemyDiagonal } from "./airplaneEnemyDiagonal.js";
 import { TerrestrialEnemy } from "./terrestrialEnemy.js";
 
 // import { camera, cameraHolder, configCamera } from "./cameraSystem.js";
