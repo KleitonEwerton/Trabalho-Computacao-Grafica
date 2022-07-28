@@ -36,6 +36,9 @@ import {
 import { rechargeBattery, createRechargeCSG } from "./rechargeSystem.js";
 
 import { sound } from "./audioSystem.js";
+import { Buttons } from "../libs/other/buttons.js";
+
+var buttons = new Buttons(onButtonDown, onButtonUp);
 
 let keyboard,
   renderer,
@@ -53,7 +56,8 @@ let keyboard,
   camera,
   cameraHolder,
   globalScaleWidth,
-  globalScaleHeight;
+  globalScaleHeight,
+  inclination;
 
 let shotsList = [];
 let landShotsList = [];
@@ -61,12 +65,80 @@ let enemyList = [];
 let landenemyList = [];
 let enemyShot = [];
 let contidos = [];
-
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
 
 //Escala global baseado no tamanho da tela
 globalScaleWidth = window.innerWidth / 1920;
 globalScaleHeight = window.innerHeight / 929;
+inclination = false;
+
+// https://yoannmoi.net/nipplejs/
+
+let joystickL = nipplejs.create({
+  zone: document.getElementById("joystickWrapper1"),
+  mode: "static",
+  lockX: false, // only move on the Y axis?
+  position: { top: "-80px", left: "80px" },
+});
+
+joystickL.on("move", function (evt, data) {
+  const steer = data.vector.x;
+  inclination = false;
+  if (start && !pause) {
+    if (
+      steer > 0.6 &&
+      player.airplane.position.x - moveSpeedAirplane <= max_axle_x
+    ) {
+      player.moveInX(moveSpeedAirplane);
+      inclination = true;
+    }
+
+    if (
+      steer < -0.6 &&
+      player.airplane.position.x + moveSpeedAirplane >= min_axle_x
+    ) {
+      player.moveInX(-moveSpeedAirplane);
+      inclination = true;
+    }
+    if (
+      steer > -0.02 &&
+      steer < 0.1 &&
+      player.airplane.position.z - moveSpeedAirplane >=
+        cameraHolder.position.z - maxDistanceShot
+    )
+      player.moveInZ(-moveSpeedAirplane);
+
+    if (
+      steer < -0.001 &&
+      steer > -0.6 &&
+      player.airplane.position.z + moveSpeedAirplane <=
+        cameraHolder.position.z - 5
+    )
+      player.moveInZ(moveSpeedAirplane);
+    if (!inclination) player.resetInclination();
+  }
+});
+joystickL.on("end", function (evt) {
+  player.resetInclination();
+});
+
+function onButtonDown(event) {
+  if (start && !pause)
+    switch (event.target.id) {
+      case "A":
+        player.shot(scene, shotsList);
+        break;
+      case "B":
+        player.shotLand(scene, landShotsList);
+        break;
+      case "full":
+        buttons.setFullScreen();
+
+        break;
+    }
+}
+
+function onButtonUp(event) {}
 
 //camera virtual usada para visualização das esferas da vida
 var lookAtVec = new THREE.Vector3(0.0, 3.0, 0.0);
@@ -84,7 +156,7 @@ var virtualCamera = new THREE.PerspectiveCamera(
 export function init() {
   keyboard = new KeyboardState();
 
-  planeSize = 500; //Tamanho do plano
+  planeSize = 600; //Tamanho do plano
 
   speed = 0.1;
   moveSpeedAirplane = 0.4;
@@ -197,7 +269,7 @@ function keyboardCamera() {
     if (
       keyboard.pressed("up") &&
       player.airplane.position.z - moveSpeedAirplane >=
-        cameraHolder.position.z - maxDistanceShot * globalScaleWidth
+        cameraHolder.position.z - maxDistanceShot
     )
       player.moveInZ(-moveSpeedAirplane);
 
@@ -208,11 +280,9 @@ function keyboardCamera() {
     )
       player.moveInZ(moveSpeedAirplane);
 
-    let inclination = false;
     if (
       keyboard.pressed("left") &&
-      player.airplane.position.x + moveSpeedAirplane >=
-        min_axle_x
+      player.airplane.position.x + moveSpeedAirplane >= min_axle_x
     ) {
       player.moveInX(-moveSpeedAirplane);
       inclination = true;
@@ -220,8 +290,7 @@ function keyboardCamera() {
 
     if (
       keyboard.pressed("right") &&
-      player.airplane.position.x - moveSpeedAirplane <=
-        max_axle_x 
+      player.airplane.position.x - moveSpeedAirplane <= max_axle_x
     ) {
       player.moveInX(moveSpeedAirplane);
 
@@ -494,7 +563,7 @@ function gerEnemysByConfigs() {
           gerAirplaneEnemyParable(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150 ,
+            cameraHolder.position.z - 150,
             speedEnemy * enemy["alphaSpeed"],
 
             enemy["angleY"]
@@ -506,7 +575,7 @@ function gerEnemysByConfigs() {
           gerAirplaneEnemyDiagonal(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150 ,
+            cameraHolder.position.z - 150,
             speedEnemy * enemy["alphaSpeed"],
 
             enemy["angleY"]
@@ -518,7 +587,7 @@ function gerEnemysByConfigs() {
           gerAirplaneEnemyNormal(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150 ,
+            cameraHolder.position.z - 150,
             speedEnemy * enemy["alphaSpeed"]
           )
         );
