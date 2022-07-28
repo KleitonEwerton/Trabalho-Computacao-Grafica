@@ -33,7 +33,7 @@ export class LandMissileEnemy extends Projeteis {
         afterload(object.scene);
       });
     }
-    loaderObject3D("./assets/missil/scene.gltf");
+    loaderObject3D("./" + extraPath +"assets/missil/scene.gltf");
   }
 
   move(qntMove, vectorPlayer, limiteY = 10) {

@@ -16,7 +16,7 @@ export class AirplaneEnemy {
     posz,
     speed,
     angleY = 0,
-    path = "./assets/enemy1/scene.gltf",
+    path = "./" + extraPath +"assets/enemy1/scene.gltf",
     geometry_obj = geometry,
     scale = 1.5
   ) {
@@ -59,7 +59,7 @@ export class AirplaneEnemy {
       this.sound.setBuffer(buffer); //Set buffer in obj shot
       this.sound.setVolume(explosionSoundVolume); //Volume
     };
-    audioLoader.load("assets/sounds/explosionAirplanes.mp3", function (buffer) {
+    audioLoader.load("./" + extraPath +"assets/sounds/explosionAirplanes.mp3", function (buffer) {
       load(buffer);
     });
   }

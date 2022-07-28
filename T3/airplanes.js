@@ -49,7 +49,7 @@ export class Airplanes {
       this.sound.setBuffer(buffer); //Set buffer in obj shot
       this.sound.setVolume(explosionSoundVolume); //Volume
     };
-    audioLoader.load("assets/sounds/explosionAirplanes.mp3", function (buffer) {
+    audioLoader.load("./" + extraPath +"assets/sounds/explosionAirplanes.mp3", function (buffer) {
       load(buffer);
     });
   }

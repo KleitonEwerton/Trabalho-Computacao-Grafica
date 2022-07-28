@@ -12,7 +12,7 @@ export class AirplaneEnemyParable extends AirplaneEnemy {
       speed,
       
       angleY,
-      "./assets/enemy2/scene.glb",
+      "./" + extraPath +"assets/enemy2/scene.glb",
       geometry,
       1
       

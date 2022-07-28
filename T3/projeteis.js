@@ -17,9 +17,9 @@ export class Projeteis {
 
     if (isEnemy) {
       this.shot.lookAt(vectorPlayer);
-      pathSound = "assets/sounds/shotEnemy.mp3";
+      pathSound = "./" + extraPath +"assets/sounds/shotEnemy.mp3";
     } else {
-      pathSound = "assets/sounds/pulsar.mp3";
+      pathSound = "./" + extraPath +"assets/sounds/pulsar.mp3";
     }
 
     this.sound = new THREE.Audio(listener);
