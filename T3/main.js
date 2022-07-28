@@ -51,7 +51,9 @@ let keyboard,
   pause,
   cheating,
   camera,
-  cameraHolder;
+  cameraHolder,
+  globalScaleWidth,
+  globalScaleHeight;
 
 let shotsList = [];
 let landShotsList = [];
@@ -61,6 +63,10 @@ let enemyShot = [];
 let contidos = [];
 
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
+
+//Escala global baseado no tamanho da tela
+globalScaleWidth = window.innerWidth / 1920;
+globalScaleHeight = window.innerHeight / 929;
 
 //camera virtual usada para visualização das esferas da vida
 var lookAtVec = new THREE.Vector3(0.0, 3.0, 0.0);
@@ -79,6 +85,7 @@ export function init() {
   keyboard = new KeyboardState();
 
   planeSize = 500; //Tamanho do plano
+
   speed = 0.1;
   moveSpeedAirplane = 0.4;
 
@@ -190,7 +197,7 @@ function keyboardCamera() {
     if (
       keyboard.pressed("up") &&
       player.airplane.position.z - moveSpeedAirplane >=
-        cameraHolder.position.z - maxDistanceShot
+        cameraHolder.position.z - maxDistanceShot * globalScaleWidth
     )
       player.moveInZ(-moveSpeedAirplane);
 
@@ -204,7 +211,8 @@ function keyboardCamera() {
     let inclination = false;
     if (
       keyboard.pressed("left") &&
-      player.airplane.position.x + moveSpeedAirplane >= min_axle_x
+      player.airplane.position.x + moveSpeedAirplane >=
+        min_axle_x
     ) {
       player.moveInX(-moveSpeedAirplane);
       inclination = true;
@@ -212,7 +220,8 @@ function keyboardCamera() {
 
     if (
       keyboard.pressed("right") &&
-      player.airplane.position.x - moveSpeedAirplane <= max_axle_x
+      player.airplane.position.x - moveSpeedAirplane <=
+        max_axle_x 
     ) {
       player.moveInX(moveSpeedAirplane);
 
@@ -485,7 +494,7 @@ function gerEnemysByConfigs() {
           gerAirplaneEnemyParable(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150,
+            cameraHolder.position.z - 150 ,
             speedEnemy * enemy["alphaSpeed"],
 
             enemy["angleY"]
@@ -497,7 +506,7 @@ function gerEnemysByConfigs() {
           gerAirplaneEnemyDiagonal(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150,
+            cameraHolder.position.z - 150 ,
             speedEnemy * enemy["alphaSpeed"],
 
             enemy["angleY"]
@@ -509,7 +518,7 @@ function gerEnemysByConfigs() {
           gerAirplaneEnemyNormal(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150,
+            cameraHolder.position.z - 150 ,
             speedEnemy * enemy["alphaSpeed"]
           )
         );
@@ -535,16 +544,34 @@ function gerEnemysByConfigs() {
   }
 }
 function gerAirplaneEnemyNormal(posx, posy, posz, speed, angleY) {
-  return new AirplaneEnemy(posx, posy, posz, speed, angleY);
+  return new AirplaneEnemy(posx * globalScaleWidth, posy, posz, speed, angleY);
 }
 function gerAirplaneEnemyDiagonal(posx, posy, posz, speed, angleY) {
-  return new AirplaneEnemyDiagonal(posx, posy, posz, speed, angleY);
+  return new AirplaneEnemyDiagonal(
+    posx * globalScaleWidth,
+    posy,
+    posz,
+    speed,
+    angleY
+  );
 }
 function gerAirplaneEnemyParable(posx, posy, posz, speed, angleY) {
-  return new AirplaneEnemyParable(posx, posy, posz, speed, angleY);
+  return new AirplaneEnemyParable(
+    posx * globalScaleWidth,
+    posy,
+    posz,
+    speed,
+    angleY
+  );
 }
 function gerTerrestrialEnemy(posx, posy, posz, speed, angleY) {
-  return new TerrestrialEnemy(posx, posy, posz, speed, angleY);
+  return new TerrestrialEnemy(
+    posx * globalScaleWidth,
+    posy,
+    posz,
+    speed,
+    angleY
+  );
 }
 //--------------------Configs-----------------------------------
 
@@ -666,4 +693,5 @@ export {
   removeFromScene,
   camera,
   renderer,
+  globalScaleWidth,
 };

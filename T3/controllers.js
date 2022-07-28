@@ -15,7 +15,10 @@ let scene2 = new THREE.Scene(); // Create secondary scene
 let loader = new GLTFLoader(); // Create global loader
 
 //*Distances
+
 var max_axle_x = 36; //Distância máxima que o AVIÃO pode percorrer no eixo x
+if (window.innerWidth < 800) var max_axle_x = 28; //Distância máxima que o AVIÃO pode percorrer no eixo x mobile
+
 var min_axle_x = -max_axle_x; //Distância mínima que o AVIÃO pode percorrer no eixo x
 var max_axle_z = 80; //Distância máxima que o AVIÃO pode percorrer no eixo z baseado na posição da câmera
 var maxDistanceShot = max_axle_z;
