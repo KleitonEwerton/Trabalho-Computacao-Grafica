@@ -74,53 +74,56 @@ inclination = false;
 
 // https://yoannmoi.net/nipplejs/
 
-let joystickL = nipplejs.create({
-  zone: document.getElementById("joystickWrapper1"),
-  mode: "static",
-  lockX: false, // only move on the Y axis?
-  position: { top: "-80px", left: "80px" },
-});
+if (mobile) {
+  let joystickL = nipplejs.create({
+    zone: document.getElementById("joystickWrapper1"),
+    mode: "static",
+    lockX: false, // only move on the Y axis?
+    position: { top: "-80px", left: "80px" },
+  });
 
-joystickL.on("move", function (evt, data) {
-  const steer = data.vector.x;
-  inclination = false;
-  if (start && !pause) {
-    if (
-      steer > 0.6 &&
-      player.airplane.position.x - moveSpeedAirplane <= max_axle_x
-    ) {
-      player.moveInX(moveSpeedAirplane);
-      inclination = true;
+  joystickL.on("move", function (evt, data) {
+    const steer = data.vector.x;
+    inclination = false;
+    if (start && !pause) {
+      if (
+        steer > 0.6 &&
+        player.airplane.position.x - moveSpeedAirplane <= max_axle_x
+      ) {
+        player.moveInX(moveSpeedAirplane);
+        inclination = true;
+      }
+
+      if (
+        steer < -0.6 &&
+        player.airplane.position.x + moveSpeedAirplane >= min_axle_x
+      ) {
+        player.moveInX(-moveSpeedAirplane);
+        inclination = true;
+      }
+      if (
+        steer > -0.02 &&
+        steer < 0.1 &&
+        player.airplane.position.z - moveSpeedAirplane >=
+          cameraHolder.position.z - maxDistanceShot
+      )
+        player.moveInZ(-moveSpeedAirplane);
+
+      if (
+        steer < -0.001 &&
+        steer > -0.6 &&
+        player.airplane.position.z + moveSpeedAirplane <=
+          cameraHolder.position.z - 5
+      )
+        player.moveInZ(moveSpeedAirplane);
+      if (!inclination) player.resetInclination();
     }
+  });
 
-    if (
-      steer < -0.6 &&
-      player.airplane.position.x + moveSpeedAirplane >= min_axle_x
-    ) {
-      player.moveInX(-moveSpeedAirplane);
-      inclination = true;
-    }
-    if (
-      steer > -0.02 &&
-      steer < 0.1 &&
-      player.airplane.position.z - moveSpeedAirplane >=
-        cameraHolder.position.z - maxDistanceShot
-    )
-      player.moveInZ(-moveSpeedAirplane);
-
-    if (
-      steer < -0.001 &&
-      steer > -0.6 &&
-      player.airplane.position.z + moveSpeedAirplane <=
-        cameraHolder.position.z - 5
-    )
-      player.moveInZ(moveSpeedAirplane);
-    if (!inclination) player.resetInclination();
-  }
-});
-joystickL.on("end", function (evt) {
-  player.resetInclination();
-});
+  joystickL.on("end", function (evt) {
+    player.resetInclination();
+  });
+}
 
 function onButtonDown(event) {
   if (start && !pause)
@@ -265,7 +268,7 @@ let atirar = true;
 function keyboardCamera() {
   keyboard.update();
 
-  if (start && !pause) {
+  if (start && !pause && !mobile) {
     if (
       keyboard.pressed("up") &&
       player.airplane.position.z - moveSpeedAirplane >=
@@ -280,6 +283,7 @@ function keyboardCamera() {
     )
       player.moveInZ(moveSpeedAirplane);
 
+    inclination = false;
     if (
       keyboard.pressed("left") &&
       player.airplane.position.x + moveSpeedAirplane >= min_axle_x
@@ -424,13 +428,8 @@ function removeAirplaneCollision() {
         enemyList.splice(cont, 1);
         removeFirstSphere();
         removeFirstSphere();
-        if (player.life <= 0) {
-          start = false;
-          player.atingido();
-          sound.stop();
-          removeAllEnemyShots();
-          removeAllShotsPlayer();
-        }
+        if (player.life <= 0) endGame();
+
         return;
       }
     }
@@ -446,13 +445,8 @@ function removeAirplaneCollisionProjeteis() {
         enemyShot[cont].removed();
         enemyShot.splice(cont, 1);
 
-        if (player.life <= 0) {
-          start = false;
-          player.atingido();
-          sound.stop();
-          removeAllEnemyShots();
-          removeAllShotsPlayer();
-        }
+        if (player.life <= 0) endGame();
+
         return;
       }
     }
@@ -751,6 +745,18 @@ function removeEnemyShot() {
     }
   }
 }
+function endGame() {
+  start = false;
+  player.atingido();
+  sound.stop();
+  removeAllEnemyShots();
+  removeAllShotsPlayer();
+
+  document.getElementById("webgl-output").style.display = "none";
+  document.getElementById("flex-box").style.display="flex";
+  document.getElementById("restartButton").style.display="block";
+  
+}
 
 export {
   scene,
@@ -763,4 +769,5 @@ export {
   camera,
   renderer,
   globalScaleWidth,
+  restart
 };
