@@ -81,7 +81,7 @@ if (mobile) {
     lockX: false, // only move on the Y axis?
     position: { top: "-80px", left: "80px" },
   });
-
+  
   joystickL.on("move", function (evt, data) {
     const steer = data.vector.x;
     inclination = false;
@@ -121,7 +121,7 @@ if (mobile) {
   });
 
   joystickL.on("end", function (evt) {
-    player.resetInclination();
+    if(start && !pause)player.resetInclination();
   });
 }
 
@@ -330,7 +330,7 @@ function keyboardCamera() {
       }
     }
   }
-  if (!start && keyboard.down("enter")) restart();
+  //if (!start && keyboard.down("enter")) restart();
 
   if (keyboard.down("P")) {
     pause = !pause;
