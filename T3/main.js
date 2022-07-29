@@ -77,41 +77,44 @@ inclination = false;
 if (mobile) {
   let joystickL = nipplejs.create({
     zone: document.getElementById("joystickWrapper1"),
-    mode: "static",
     lockX: false, // only move on the Y axis?
     position: { top: "-80px", left: "80px" },
+    size: 120,
+    multitouch: true,
+    maxNumberOfNipples: 2,
+    mode: "static",
+    restJoystick: true,
+    shape: "circle",
+    dynamicPage: true,
   });
-  
-  joystickL.on("move", function (evt, data) {
-    const steer = data.vector.x;
+
+  joystickL["0"].on("move", function (evt, data) {
+    const forward = data.vector.y;
+    const turn = data.vector.x;
+    console.log(forward, turn);
     inclination = false;
     if (start && !pause) {
       if (
-        steer > 0.6 &&
+        turn > 0.5 &&
         player.airplane.position.x - moveSpeedAirplane <= max_axle_x
       ) {
         player.moveInX(moveSpeedAirplane);
         inclination = true;
-      }
-
-      if (
-        steer < -0.6 &&
+      } else if (
+        turn < -0.5 &&
         player.airplane.position.x + moveSpeedAirplane >= min_axle_x
       ) {
         player.moveInX(-moveSpeedAirplane);
         inclination = true;
       }
       if (
-        steer > -0.02 &&
-        steer < 0.1 &&
+        forward > 0.5 &&
         player.airplane.position.z - moveSpeedAirplane >=
           cameraHolder.position.z - maxDistanceShot
       )
         player.moveInZ(-moveSpeedAirplane);
-
-      if (
-        steer < -0.001 &&
-        steer > -0.6 &&
+      else if (
+        forward < -0.5 &&
         player.airplane.position.z + moveSpeedAirplane <=
           cameraHolder.position.z - 5
       )
@@ -120,8 +123,8 @@ if (mobile) {
     }
   });
 
-  joystickL.on("end", function (evt) {
-    if(start && !pause)player.resetInclination();
+  joystickL["0"].on("end", function (evt) {
+    if (start && !pause) player.resetInclination();
   });
 }
 
@@ -428,7 +431,10 @@ function removeAirplaneCollision() {
         enemyList.splice(cont, 1);
         removeFirstSphere();
         removeFirstSphere();
-        if (player.life <= 0) endGame();
+        if (player.life <= 0) {
+          player.resetInclination();
+          endGame();
+        }
 
         return;
       }
@@ -445,7 +451,10 @@ function removeAirplaneCollisionProjeteis() {
         enemyShot[cont].removed();
         enemyShot.splice(cont, 1);
 
-        if (player.life <= 0) endGame();
+        if (player.life <= 0) {
+          player.resetInclination();
+          endGame();
+        }
 
         return;
       }
@@ -753,9 +762,8 @@ function endGame() {
   removeAllShotsPlayer();
 
   document.getElementById("webgl-output").style.display = "none";
-  document.getElementById("flex-box").style.display="flex";
-  document.getElementById("restartButton").style.display="block";
-  
+  document.getElementById("flex-box").style.display = "flex";
+  document.getElementById("restartButton").style.display = "block";
 }
 
 export {
@@ -769,5 +777,5 @@ export {
   camera,
   renderer,
   globalScaleWidth,
-  restart
+  restart,
 };
