@@ -5,7 +5,13 @@ import { LandMissile } from "./landMissile.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import { scene } from "./main.js";
 import { audioLoader, listener } from "./audioSystem.js";
-import {explosionSoundVolume} from "./controllers.js";
+import {
+  explosionSoundVolume,
+  max_axle_x,
+  min_axle_x,
+  maxDistanceShot,
+  moveSpeedAirplane,
+} from "./controllers.js";
 
 let loader = new GLTFLoader();
 let max_inclination = 40;
@@ -49,16 +55,23 @@ export class Airplanes {
       this.sound.setBuffer(buffer); //Set buffer in obj shot
       this.sound.setVolume(explosionSoundVolume); //Volume
     };
-    audioLoader.load("./" + extraPath +"assets/sounds/explosionAirplanes.mp3", function (buffer) {
-      load(buffer);
-    });
+    audioLoader.load(
+      "./" + extraPath + "assets/sounds/explosionAirplanes.mp3",
+      function (buffer) {
+        load(buffer);
+      }
+    );
   }
   airplane() {
     return this.airplane;
   }
 
   moveInX(qntMove) {
-    if (this.obj != undefined) {
+    if (
+      this.obj != undefined &&
+      this.airplane.position.x + qntMove <= max_axle_x &&
+      this.airplane.position.x + qntMove >= min_axle_x
+    ) {
       this.vectorPosition.x += 1.9 * qntMove;
       this.airplane.position.lerp(this.vectorPosition, 5 * this.speed);
 
@@ -79,8 +92,12 @@ export class Airplanes {
     }
   }
 
-  moveInZ(qntMove) {
-    if (this.obj != undefined) {
+  moveInZ(qntMove, control = 0) {
+    if (
+      this.obj != undefined &&
+      this.airplane.position.z + qntMove <= control - 5 &&
+      this.airplane.position.z + qntMove >= control - maxDistanceShot + 10
+    ) {
       this.vectorPosition.z += 1.4 * qntMove;
       this.airplane.position.lerp(this.vectorPosition, this.speed);
       this.obj.position.lerp(this.vectorPosition, this.speed);
@@ -131,14 +148,14 @@ export class Airplanes {
   }
 
   atingido() {
+    this.resetInclination();
     this.sound.play();
 
     this.rotate();
   }
   rotate() {
     for (let i = 0; i < 180; i += 1)
-      if (this.obj != undefined) 
-        this.obj.rotateY(Math.PI /180);
+      if (this.obj != undefined) this.obj.rotateY(Math.PI / 180);
   }
   getLife() {
     return this.life;

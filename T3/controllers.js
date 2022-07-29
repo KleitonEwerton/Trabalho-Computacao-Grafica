@@ -25,10 +25,14 @@ var maxDistanceShot = max_axle_z;
 
 //* Sobre o Player
 var shotPerSecond = 2;
-
 var posInitPlayerX = 0;
 var posInitPlayerY = 10;
 var posInitPlayerZ = -20;
+var moveSpeedAirplane = 0.4;
+if(mobile)
+  moveSpeedAirplane *= 1.5;
+  
+
 
 //*Sobre o inimigo
 var speedEnemy = 0.2;
@@ -51,4 +55,5 @@ export {
   explosionSoundVolume,
   shotSoundVolume,
   landEnemyMissileScale,
+  moveSpeedAirplane,
 };

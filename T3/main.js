@@ -16,6 +16,7 @@ import {
   shotPerSecond,
   enemyShotPerSecond,
   speedEnemy,
+  moveSpeedAirplane,
 } from "./controllers.js";
 
 import { distanceBetweenTwoPointsXZ } from "./utils.js";
@@ -25,6 +26,7 @@ import { AirplaneEnemy } from "./airplaneEnemy.js";
 import { AirplaneEnemyParable } from "./airplaneEnemyParable.js";
 import { AirplaneEnemyDiagonal } from "./airplaneEnemyDiagonal.js";
 import { TerrestrialEnemy } from "./terrestrialEnemy.js";
+import { restartDisplay } from "./gameSystem.js";
 
 // import { camera, cameraHolder, configCamera } from "./cameraSystem.js";
 import { removeFirstSphere, resetSpheres } from "./lifeSystem.js";
@@ -49,7 +51,6 @@ let keyboard,
   controlsPlane,
   player,
   speed,
-  moveSpeedAirplane,
   start,
   pause,
   cheating,
@@ -57,14 +58,21 @@ let keyboard,
   cameraHolder,
   globalScaleWidth,
   globalScaleHeight,
-  inclination;
+  inclination,
+  enterHabilistic; //Permite o enter ser precionado apos o fim do game
 
+enterHabilistic = false;
 let shotsList = [];
 let landShotsList = [];
 let enemyList = [];
 let landenemyList = [];
 let enemyShot = [];
 let contidos = [];
+
+let fwdValue = 0;
+let bkdValue = 0;
+let rgtValue = 0;
+let lftValue = 0;
 //----------------------------- CONFIGURAÇÕES BASICAS---------------------------------//
 
 //Escala global baseado no tamanho da tela
@@ -91,40 +99,50 @@ if (mobile) {
   joystickL["0"].on("move", function (evt, data) {
     const forward = data.vector.y;
     const turn = data.vector.x;
-    console.log(forward, turn);
     inclination = false;
     if (start && !pause) {
       if (
-        turn > 0.5 &&
+        turn > 0.1 &&
         player.airplane.position.x - moveSpeedAirplane <= max_axle_x
       ) {
-        player.moveInX(moveSpeedAirplane);
+        lftValue = 0;
+        rgtValue = Math.abs(turn);
         inclination = true;
       } else if (
-        turn < -0.5 &&
+        turn < -0.1 &&
         player.airplane.position.x + moveSpeedAirplane >= min_axle_x
       ) {
-        player.moveInX(-moveSpeedAirplane);
+        lftValue = Math.abs(turn);
+        rgtValue = 0;
         inclination = true;
       }
+
+      if (!inclination) player.resetInclination();
+
       if (
-        forward > 0.5 &&
+        forward > 0.3 &&
         player.airplane.position.z - moveSpeedAirplane >=
           cameraHolder.position.z - maxDistanceShot
-      )
-        player.moveInZ(-moveSpeedAirplane);
-      else if (
-        forward < -0.5 &&
+      ) {
+        fwdValue = Math.abs(forward);
+        bkdValue = 0;
+      } else if (
+        forward < -0.3 &&
         player.airplane.position.z + moveSpeedAirplane <=
           cameraHolder.position.z - 5
-      )
-        player.moveInZ(moveSpeedAirplane);
-      if (!inclination) player.resetInclination();
+      ) {
+        fwdValue = 0;
+        bkdValue = Math.abs(forward);
+      }
     }
   });
 
   joystickL["0"].on("end", function (evt) {
     if (start && !pause) player.resetInclination();
+    bkdValue = 0;
+    fwdValue = 0;
+    lftValue = 0;
+    rgtValue = 0;
   });
 }
 
@@ -165,7 +183,6 @@ export function init() {
   planeSize = 600; //Tamanho do plano
 
   speed = 0.1;
-  moveSpeedAirplane = 0.4;
 
   start = true;
   cheating = false;
@@ -272,33 +289,19 @@ function keyboardCamera() {
   keyboard.update();
 
   if (start && !pause && !mobile) {
-    if (
-      keyboard.pressed("up") &&
-      player.airplane.position.z - moveSpeedAirplane >=
-        cameraHolder.position.z - maxDistanceShot
-    )
-      player.moveInZ(-moveSpeedAirplane);
+    if (keyboard.pressed("up"))
+      player.moveInZ(-moveSpeedAirplane, cameraHolder.position.z );
 
-    if (
-      keyboard.pressed("down") &&
-      player.airplane.position.z + moveSpeedAirplane <=
-        cameraHolder.position.z - 5
-    )
-      player.moveInZ(moveSpeedAirplane);
+    if (keyboard.pressed("down"))
+      player.moveInZ(moveSpeedAirplane, cameraHolder.position.z);
 
     inclination = false;
-    if (
-      keyboard.pressed("left") &&
-      player.airplane.position.x + moveSpeedAirplane >= min_axle_x
-    ) {
+    if (keyboard.pressed("left")) {
       player.moveInX(-moveSpeedAirplane);
       inclination = true;
     }
 
-    if (
-      keyboard.pressed("right") &&
-      player.airplane.position.x - moveSpeedAirplane <= max_axle_x
-    ) {
+    if (keyboard.pressed("right")) {
       player.moveInX(moveSpeedAirplane);
 
       inclination = true;
@@ -333,7 +336,7 @@ function keyboardCamera() {
       }
     }
   }
-  //if (!start && keyboard.down("enter")) restart();
+  if (enterHabilistic && !start && keyboard.down("enter")) restartDisplay();
 
   if (keyboard.down("P")) {
     pause = !pause;
@@ -432,7 +435,6 @@ function removeAirplaneCollision() {
         removeFirstSphere();
         removeFirstSphere();
         if (player.life <= 0) {
-          player.resetInclination();
           endGame();
         }
 
@@ -452,7 +454,6 @@ function removeAirplaneCollisionProjeteis() {
         enemyShot.splice(cont, 1);
 
         if (player.life <= 0) {
-          player.resetInclination();
           endGame();
         }
 
@@ -503,6 +504,12 @@ function updateAllEnemys() {
 }
 
 function updateAnimations() {
+  if (mobile) {
+    player.moveInX(moveSpeedAirplane * rgtValue);
+    player.moveInX(moveSpeedAirplane * -lftValue);
+    player.moveInZ(moveSpeedAirplane * bkdValue, cameraHolder.position.z);
+    player.moveInZ(moveSpeedAirplane * -fwdValue, cameraHolder.position.z);
+  }
   updateAllEnemys();
   updateShots();
   updateLandShots();
@@ -725,6 +732,8 @@ function restart() {
     player.setPosition(posInitPlayerX, posInitPlayerY, posInitPlayerZ); //Reseta o player
 
     start = true;
+    enterHabilistic = false;
+
     player.rotate();
     player.resetLife();
     resetSpheres();
@@ -754,16 +763,20 @@ function removeEnemyShot() {
     }
   }
 }
+
 function endGame() {
   start = false;
-  player.atingido();
   sound.stop();
+  player.atingido();
   removeAllEnemyShots();
   removeAllShotsPlayer();
 
-  document.getElementById("webgl-output").style.display = "none";
-  document.getElementById("flex-box").style.display = "flex";
-  document.getElementById("restartButton").style.display = "block";
+  setTimeout(() => {
+    enterHabilistic = true;
+    document.getElementById("webgl-output").style.display = "none";
+    document.getElementById("flex-box").style.display = "flex";
+    document.getElementById("restartButton").style.display = "block";
+  }, 1000);
 }
 
 export {
