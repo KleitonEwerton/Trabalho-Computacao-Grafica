@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
   <head>
     <title>MOBILE</title>
 
@@ -59,29 +59,23 @@
       B
     </button>
 
-    <button
-      style="
-        top: 10px;
-        right: 10px;
-        width: 1emp;
-        line-height: 1.4em;
-        font-size: 10pt;
-        background-color: #cccccc;
-        background-image: none;
-      "
-      id="full"
-      class="video-game-button"
-    >
-      [ ]
-    </button>
     <div class="flex-box" id="flex-box">
-      <div id="overlay">
+      <div class="btn-start">
         <button
           id="startButton"
           class="startButton"
           style="background-color: red"
         >
-          PLAY
+          START
+        </button>
+      </div>
+      <div class="btn-restart">
+        <button
+          id="restartButton"
+          class="startButton"
+          style="background-color: red; display: none"
+        >
+          RESTART
         </button>
       </div>
 
@@ -98,6 +92,7 @@
     <div id="webgl-output">
       <script type="text/javascript">
         var extraPath = "/T3/";
+        var mobile = true;
       </script>
       <script src="./libs/other/ammo.wasm.js"></script>
       <script src="./libs/other/nipplejs.js"></script>
