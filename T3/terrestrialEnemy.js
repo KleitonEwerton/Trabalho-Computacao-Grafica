@@ -3,7 +3,7 @@ import {LandMissileEnemy} from "./landMissileEnemy.js";
 import * as THREE from "three";
 import { scene, removeFromScene } from "./main.js";
 
-const geometry = new THREE.BoxGeometry(36, 8, 6);
+const geometry = new THREE.BoxGeometry(36, 10, 20);
 
 export class TerrestrialEnemy extends AirplaneEnemy {
   constructor(posx, posy, posz, speed,angleY) {

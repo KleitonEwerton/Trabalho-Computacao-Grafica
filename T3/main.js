@@ -573,7 +573,7 @@ function gerEnemysByConfigs() {
           gerAirplaneEnemyParable(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150,
+            posCam - 150,
             speedEnemy * enemy["alphaSpeed"],
 
             enemy["angleY"]
@@ -585,7 +585,7 @@ function gerEnemysByConfigs() {
           gerAirplaneEnemyDiagonal(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150,
+            posCam - 150,
             speedEnemy * enemy["alphaSpeed"],
 
             enemy["angleY"]
@@ -597,7 +597,7 @@ function gerEnemysByConfigs() {
           gerAirplaneEnemyNormal(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150,
+            posCam - 150,
             speedEnemy * enemy["alphaSpeed"]
           )
         );
@@ -608,7 +608,7 @@ function gerEnemysByConfigs() {
           gerTerrestrialEnemy(
             enemy["posx"],
             enemy["posy"],
-            cameraHolder.position.z - 150,
+            posCam - 150,
             speedEnemy * enemy["alphaSpeed"],
 
             enemy["angleY"]
@@ -640,7 +640,6 @@ function gerAirplaneEnemyParable(posx, posy, posz, speed, angleY) {
   return new AirplaneEnemyParable(posx, posy, posz, speed, angleY);
 }
 function gerTerrestrialEnemy(posx, posy, posz, speed, angleY) {
-  console.log(posx, posy, posz, speed, angleY);
   return new TerrestrialEnemy(posx, posy, posz, speed, angleY);
 }
 //--------------------Configs-----------------------------------
