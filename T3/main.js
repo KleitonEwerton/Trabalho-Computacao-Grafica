@@ -290,7 +290,7 @@ function keyboardCamera() {
 
   if (start && !pause && !mobile) {
     if (keyboard.pressed("up"))
-      player.moveInZ(-moveSpeedAirplane, cameraHolder.position.z );
+      player.moveInZ(-moveSpeedAirplane, cameraHolder.position.z);
 
     if (keyboard.pressed("down"))
       player.moveInZ(moveSpeedAirplane, cameraHolder.position.z);
@@ -622,35 +622,26 @@ function gerEnemysByConfigs() {
     }
   }
 }
+const geometry = new THREE.BoxGeometry(7, 2, 7);
 function gerAirplaneEnemyNormal(posx, posy, posz, speed, angleY) {
-  return new AirplaneEnemy(posx * globalScaleWidth, posy, posz, speed, angleY);
+  return new AirplaneEnemy(
+    posx,
+    posy,
+    posz,
+    speed,
+    angleY
+    
+  );
 }
 function gerAirplaneEnemyDiagonal(posx, posy, posz, speed, angleY) {
-  return new AirplaneEnemyDiagonal(
-    posx * globalScaleWidth,
-    posy,
-    posz,
-    speed,
-    angleY
-  );
+  return new AirplaneEnemyDiagonal(posx, posy, posz, speed, angleY);
 }
 function gerAirplaneEnemyParable(posx, posy, posz, speed, angleY) {
-  return new AirplaneEnemyParable(
-    posx * globalScaleWidth,
-    posy,
-    posz,
-    speed,
-    angleY
-  );
+  return new AirplaneEnemyParable(posx, posy, posz, speed, angleY);
 }
 function gerTerrestrialEnemy(posx, posy, posz, speed, angleY) {
-  return new TerrestrialEnemy(
-    posx * globalScaleWidth,
-    posy,
-    posz,
-    speed,
-    angleY
-  );
+  console.log(posx, posy, posz, speed, angleY);
+  return new TerrestrialEnemy(posx, posy, posz, speed, angleY);
 }
 //--------------------Configs-----------------------------------
 

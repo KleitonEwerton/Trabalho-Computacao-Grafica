@@ -110,7 +110,9 @@ export class Airplanes {
     if (this.obj != undefined) {
       this.vectorPosition.z += qntMove;
       this.airplane.position.lerp(this.vectorPosition, alpha);
+      
       this.obj.position.lerp(this.vectorPosition, alpha);
+      this.obj.position.y += -1;
       
     }
   }

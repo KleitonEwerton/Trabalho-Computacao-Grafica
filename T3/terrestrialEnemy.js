@@ -3,11 +3,11 @@ import {LandMissileEnemy} from "./landMissileEnemy.js";
 import * as THREE from "three";
 import { scene, removeFromScene } from "./main.js";
 
-const geometry = new THREE.BoxGeometry(6, 18, 22);
+const geometry = new THREE.BoxGeometry(36, 8, 6);
 
 export class TerrestrialEnemy extends AirplaneEnemy {
   constructor(posx, posy, posz, speed,angleY) {
-    super(posx, posy - 3, posz, speed, angleY, "./" + extraPath +"assets/enemy4/scene.gltf", geometry, 1);
+    super(posx, posy + 3, posz, speed, angleY, "./" + extraPath +"assets/enemy4/scene.gltf", geometry, 0.4);
     removeFromScene(this.cube);
   }
 

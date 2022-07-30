@@ -5,7 +5,7 @@ import { scene } from "./main.js";
 import { audioLoader, listener } from "./audioSystem.js";
 import { explosionSoundVolume } from "./controllers.js";
 
-const geometry = new THREE.BoxGeometry(7, 2, 7);
+const geometry = new THREE.BoxGeometry(10, 4, 10);
 let material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
 let loader = new GLTFLoader();
 
@@ -16,9 +16,9 @@ export class AirplaneEnemy {
     posz,
     speed,
     angleY = 0,
-    path = "./" + extraPath +"assets/enemy1/scene.gltf",
+    path = "./" + extraPath + "assets/enemy1/scene.gltf",
     geometry_obj = geometry,
-    scale = 1.5
+    scale = 0.035
   ) {
     this.isEnemy = true;
     this.speed = speed;
@@ -39,6 +39,7 @@ export class AirplaneEnemy {
         object.scene.position.set(posx, posy, posz);
         object.scene.scale.set(scale, scale, scale);
         object.scene.rotateY(angleY * (Math.PI / 180));
+        if (scale == 0.035) object.scene.rotateX(15 * (Math.PI / 180));
 
         object.scene.traverse(function (child) {
           if (child) child.castShadow = true;
@@ -59,9 +60,12 @@ export class AirplaneEnemy {
       this.sound.setBuffer(buffer); //Set buffer in obj shot
       this.sound.setVolume(explosionSoundVolume); //Volume
     };
-    audioLoader.load("./" + extraPath +"assets/sounds/explosionAirplanes.mp3", function (buffer) {
-      load(buffer);
-    });
+    audioLoader.load(
+      "./" + extraPath + "assets/sounds/explosionAirplanes.mp3",
+      function (buffer) {
+        load(buffer);
+      }
+    );
   }
   cube() {
     return this.cube();
@@ -77,7 +81,7 @@ export class AirplaneEnemy {
       this.cube.translateZ(this.speed);
       this.vectorPosition.copy(this.cube.position);
       let vector = new THREE.Vector3().copy(this.cube.position);
-      vector.y = 5;
+      vector.y = 8;
       this.obj.position.lerp(vector, 1);
     }
   }

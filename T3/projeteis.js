@@ -55,6 +55,7 @@ export class Projeteis {
     return this.vectorPosition;
   }
   removed(time = 0) {
+    this.shot.position.z += this.shot.position.z * 4;
     removeFromScene(this.shot, time * 1000);
   }
 }

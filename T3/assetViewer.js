@@ -67,14 +67,12 @@ var infoBox = new SecondaryBox("");
 var objectArray = new Array();
 var activeObject = 0; // View first object
 
-loadGLTFFile("./assets/", "enemy1", 1.0, 180, true);
+loadGLTFFile("./assets/", "enemy1", 1.0, 180, false);
 loadGLTFFile("./assets/", "enemy2", 1.0, 180, false);
 loadGLTFFile("./assets/", "enemy3", 1.0, 180, false);
 loadGLTFFile("./assets/", "enemy4", 1.0, 180, false);
-loadGLTFFile("./assets/", "player1", 1.0, 180,false);
-loadGLTFFile("./assets/", "missil", 1.0, 180, false);
-
-
+loadGLTFFile("./assets/", "player1", 1.0, 180, false);
+loadGLTFFile("./assets/", "missil", 1.0, 180, true);
 
 buildInterface();
 render();
@@ -87,7 +85,7 @@ function loadGLTFFile(modelPath, modelFolder, desiredScale, angle, visibility) {
       var obj = gltf.scene;
       obj.visible = visibility;
       obj.name = modelFolder;
-      
+
       obj.traverse(function (child) {
         if (child) {
           child.castShadow = true;
