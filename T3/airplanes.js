@@ -26,14 +26,16 @@ export class Airplanes {
       this.obj = object;
       this.obj.castShadow = true;
       scene.add(this.obj);
+      
     };
 
     returnFBX(path);
     function returnFBX(PATH) {
       loader.load(PATH, function (object) {
         object.scene.position.set(posx, posy, posz);
-        object.scene.scale.set(0.5, 0.5, 0.5);
+        object.scene.scale.set(0.05, 0.05, 0.05);
         object.scene.rotateY((3 * Math.PI) / 2);
+        object.scene.rotateZ(30 * (Math.PI/ 180));
 
         object.scene.traverse(function (child) {
           if (child) child.castShadow = true;
@@ -109,6 +111,7 @@ export class Airplanes {
       this.vectorPosition.z += qntMove;
       this.airplane.position.lerp(this.vectorPosition, alpha);
       this.obj.position.lerp(this.vectorPosition, alpha);
+      
     }
   }
 
@@ -170,3 +173,4 @@ export class Airplanes {
     this.life = this.life - damage;
   }
 }
+

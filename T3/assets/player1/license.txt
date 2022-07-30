@@ -1,0 +1,11 @@
+Model Information:
+* title:	Fokker Dr1 Military Airplane
+* source:	https://sketchfab.com/3d-models/fokker-dr1-military-airplane-de8c83015bbc4aac87232598e7782ddf
+* author:	Watse D'haene (https://sketchfab.com/rrrapid)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Fokker Dr1 Military Airplane" (https://sketchfab.com/3d-models/fokker-dr1-military-airplane-de8c83015bbc4aac87232598e7782ddf) by Watse D'haene (https://sketchfab.com/rrrapid) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -67,11 +67,11 @@ var infoBox = new SecondaryBox("");
 var objectArray = new Array();
 var activeObject = 0; // View first object
 
-loadGLTFFile("./assets/", "enemy1", 1.0, 180, false);
+loadGLTFFile("./assets/", "enemy1", 1.0, 180, true);
 loadGLTFFile("./assets/", "enemy2", 1.0, 180, false);
 loadGLTFFile("./assets/", "enemy3", 1.0, 180, false);
 loadGLTFFile("./assets/", "enemy4", 1.0, 180, false);
-loadGLTFFile("./assets/", "player1", 1.0, 180,true);
+loadGLTFFile("./assets/", "player1", 1.0, 180,false);
 loadGLTFFile("./assets/", "missil", 1.0, 180, false);
 
 
