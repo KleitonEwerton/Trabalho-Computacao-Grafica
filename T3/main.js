@@ -298,7 +298,7 @@ let atirar = true;
 function keyboardCamera() {
   keyboard.update();
 
-  if (start && !pause && !mobile) {
+  if (start && !pause) {
     if (keyboard.pressed("up"))
       player.moveInZ(-moveSpeedAirplane, cameraHolder.position.z);
 
@@ -762,7 +762,7 @@ function createPlanes() {
   const waterGeometry = new THREE.PlaneGeometry(110, planeSize);
 
   water = new Water(waterGeometry, {
-    color: "#ffffff",
+    color: "#b2b2ff",
     scale: 4,
     flowX: 1,
     flowY: 1,
@@ -774,7 +774,7 @@ function createPlanes() {
   water.rotation.x = Math.PI * -0.5;
 
   water2 = new Water(waterGeometry, {
-    color: "#ffffff",
+    color: "#b2b2ff",
     scale: 4,
     flowX: 1,
     flowY: 1,
