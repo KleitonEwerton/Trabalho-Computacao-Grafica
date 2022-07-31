@@ -33,7 +33,7 @@ export class Airplanes {
     function returnFBX(PATH) {
       loader.load(PATH, function (object) {
         object.scene.position.set(posx, posy, posz);
-        object.scene.scale.set(0.05, 0.05, 0.05);
+        object.scene.scale.set(0.09, 0.05, 0.05);
         object.scene.rotateY((3 * Math.PI) / 2);
         object.scene.rotateZ(30 * (Math.PI/ 180));
 

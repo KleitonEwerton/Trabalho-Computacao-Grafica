@@ -1,6 +1,6 @@
 import { init } from "./main.js";
 import { sound, loaded } from "./audioSystem.js";
-import { restart } from "./main.js";
+import { restart, gameCheat, gamePause } from "./main.js";
 
 const startButton = document.getElementById("startButton");
 const loader = document.getElementById("loader");
@@ -32,4 +32,17 @@ function restartDisplay() {
   }, 1000);
   restart();
 }
+
+if (mobile) {
+  const pauseButton = document.getElementById("btn-p");
+  pauseButton.addEventListener("click", () => {
+    gamePause();
+  });
+
+  const cheatButton = document.getElementById("btn-g");
+  cheatButton.addEventListener("click", () => {
+    gameCheat();
+  });
+}
+
 export { loader, restartDisplay };

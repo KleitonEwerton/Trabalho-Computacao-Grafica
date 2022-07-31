@@ -39,6 +39,7 @@ import { rechargeBattery, createRechargeCSG } from "./rechargeSystem.js";
 
 import { sound } from "./audioSystem.js";
 import { Buttons } from "../libs/other/buttons.js";
+import { Water } from "./jsm/objects/Water2.js";
 
 var buttons = new Buttons(onButtonDown, onButtonUp);
 
@@ -59,7 +60,17 @@ let keyboard,
   globalScaleWidth,
   globalScaleHeight,
   inclination,
-  enterHabilistic; //Permite o enter ser precionado apos o fim do game
+  enterHabilistic,
+  water,
+  water2,
+  dirtRight,
+  dirtLeft,
+  grassLeft,
+  grassRight,
+  dirtRight2,
+  dirtLeft2,
+  grassLeft2,
+  grassRight2; //Permite o enter ser precionado apos o fim do game
 
 enterHabilistic = false;
 let shotsList = [];
@@ -201,7 +212,6 @@ export function init() {
   configCamera();
   createPlanes();
   createPlayer();
-
   resetSpheres();
 
   virtualCamera.position.copy(camPosition);
@@ -339,13 +349,10 @@ function keyboardCamera() {
   if (enterHabilistic && !start && keyboard.down("enter")) restartDisplay();
 
   if (keyboard.down("P")) {
-    pause = !pause;
-    if (pause) {
-      sound.pause();
-    } else sound.play();
+    gamePause();
   }
 
-  if (keyboard.down("G")) cheating = !cheating;
+  if (keyboard.down("G")) gameCheat();
 }
 //---------------------------------------------------------------------
 
@@ -534,8 +541,21 @@ function renderInfinityPlane() {
   if (cameraHolder.position.z < limiterPlane) {
     limiterPlane += -planeSize;
 
-    if (controlsPlane % 2 == 0) plane.position.z = limiterPlane;
-    else plane2.position.z = limiterPlane;
+    if (controlsPlane % 2 == 0) {
+      plane.position.z = limiterPlane;
+      water.position.z = limiterPlane;
+      dirtLeft.position.z = limiterPlane;
+      dirtRight.position.z = limiterPlane;
+      grassLeft.position.z = limiterPlane;
+      grassRight.position.z = limiterPlane;
+    } else {
+      plane2.position.z = limiterPlane;
+      water2.position.z = limiterPlane;
+      dirtLeft2.position.z = limiterPlane;
+      dirtRight2.position.z = limiterPlane;
+      grassLeft2.position.z = limiterPlane;
+      grassRight2.position.z = limiterPlane;
+    }
 
     controlsPlane += 1;
   }
@@ -560,6 +580,8 @@ function render() {
   }
   requestAnimationFrame(render);
 }
+
+let lastTerretrial = 0;
 
 function gerEnemysByConfigs() {
   let posCam = Math.round(cameraHolder.position.z, 0).toString();
@@ -614,6 +636,7 @@ function gerEnemysByConfigs() {
             enemy["angleY"]
           )
         );
+
         return;
 
       case "recharge":
@@ -624,14 +647,7 @@ function gerEnemysByConfigs() {
 }
 const geometry = new THREE.BoxGeometry(7, 2, 7);
 function gerAirplaneEnemyNormal(posx, posy, posz, speed, angleY) {
-  return new AirplaneEnemy(
-    posx,
-    posy,
-    posz,
-    speed,
-    angleY
-    
-  );
+  return new AirplaneEnemy(posx, posy, posz, speed, angleY);
 }
 function gerAirplaneEnemyDiagonal(posx, posy, posz, speed, angleY) {
   return new AirplaneEnemyDiagonal(posx, posy, posz, speed, angleY);
@@ -645,15 +661,163 @@ function gerTerrestrialEnemy(posx, posy, posz, speed, angleY) {
 //--------------------Configs-----------------------------------
 
 function createPlanes() {
-  //Criar plano
-  plane = createGroundPlaneWired(planeSize, planeSize, 50, 50);
-  plane2 = createGroundPlaneWired(planeSize, planeSize, 50, 50);
+  const textureLoader = new THREE.TextureLoader();
+
+  const groundGeometry = new THREE.PlaneGeometry(100, planeSize);
+  const groundMaterial = new THREE.MeshStandardMaterial({
+    roughness: 0.8,
+    metalness: 0.4,
+  });
+  //Create Planes
+  plane = new THREE.Mesh(groundGeometry, groundMaterial);
+  plane2 = new THREE.Mesh(groundGeometry, groundMaterial);
+  plane.rotation.x = Math.PI * -0.5;
+  plane2.rotation.x = Math.PI * -0.5;
+
+  //Dirt
+  const dirtGeometry = new THREE.PlaneGeometry(40, planeSize);
+  const dirtMaterial = new THREE.MeshStandardMaterial({
+    roughness: 0.8,
+    metalness: 0.4,
+  });
+  dirtLeft = new THREE.Mesh(dirtGeometry, dirtMaterial);
+  dirtLeft.rotation.x = Math.PI * -0.5;
+  dirtLeft.translateX(-50);
+  dirtLeft.position.y = -1;
+
+  dirtRight = new THREE.Mesh(dirtGeometry, dirtMaterial);
+  dirtRight.rotation.x = Math.PI * -0.5;
+  dirtRight.translateX(50);
+  dirtRight.position.y = -1;
+
+  dirtLeft2 = new THREE.Mesh(dirtGeometry, dirtMaterial);
+  dirtLeft2.rotation.x = Math.PI * -0.5;
+  dirtLeft2.translateX(-50);
+  dirtLeft2.position.y = -1;
+
+  dirtRight2 = new THREE.Mesh(dirtGeometry, dirtMaterial);
+  dirtRight2.rotation.x = Math.PI * -0.5;
+  dirtRight2.translateX(50);
+  dirtRight2.position.y = -1;
+
+  //Grass
+  const grassGeometry = new THREE.PlaneGeometry(200, planeSize);
+  const grassMaterial = new THREE.MeshStandardMaterial({
+    roughness: 0.8,
+    metalness: 0.4,
+  });
+  grassLeft = new THREE.Mesh(grassGeometry, grassMaterial);
+  grassLeft.rotation.x = Math.PI * -0.5;
+  grassLeft.translateX(-160);
+  grassLeft.translateZ(1.5);
+  grassLeft.translateY(-1.5);
+
+  grassRight = new THREE.Mesh(grassGeometry, grassMaterial);
+  grassRight.rotation.x = Math.PI * -0.5;
+  grassRight.translateX(160);
+  grassRight.translateZ(1.5);
+  grassRight.translateY(-1.5);
+
+  grassLeft2 = new THREE.Mesh(grassGeometry, grassMaterial);
+  grassLeft2.rotation.x = Math.PI * -0.5;
+  grassLeft2.translateX(-160);
+  grassLeft2.translateZ(1.5);
+  grassLeft2.translateY(-1.5);
+
+  grassRight2 = new THREE.Mesh(grassGeometry, grassMaterial);
+  grassRight2.rotation.x = Math.PI * -0.5;
+  grassRight2.translateX(160);
+  grassRight2.translateZ(1.5);
+  grassRight2.translateY(-1.5);
+
+  //textures
+  textureLoader.load("./" + extraPath +"assets/textures/stone.png", function (map) {
+    map.wrapS = THREE.RepeatWrapping;
+    map.wrapT = THREE.RepeatWrapping;
+    map.anisotropy = 16;
+    map.repeat.set(4, 4);
+    groundMaterial.map = map;
+    groundMaterial.needsUpdate = true;
+  });
+
+  textureLoader.load("./" + extraPath +"assets/textures/dirt.jpg", function (map) {
+    map.wrapS = THREE.RepeatWrapping;
+    map.wrapT = THREE.RepeatWrapping;
+    map.anisotropy = 16;
+    map.repeat.set(1, 10);
+    dirtMaterial.map = map;
+    dirtMaterial.needsUpdate = true;
+  });
+
+  textureLoader.load("./" + extraPath +"assets/textures/grama.jpg", function (map) {
+    map.wrapS = THREE.RepeatWrapping;
+    map.wrapT = THREE.RepeatWrapping;
+    map.anisotropy = 16;
+    map.repeat.set(4, 4);
+    grassMaterial.map = map;
+    grassMaterial.needsUpdate = true;
+  });
+
+  // waters
+  const waterGeometry = new THREE.PlaneGeometry(110, planeSize);
+
+  water = new Water(waterGeometry, {
+    color: "#ffffff",
+    scale: 4,
+    flowX: 1,
+    flowY: 1,
+    textureWidth: 1024,
+    textureHeight: 1024,
+  });
+
+  water.position.y = 1;
+  water.rotation.x = Math.PI * -0.5;
+
+  water2 = new Water(waterGeometry, {
+    color: "#ffffff",
+    scale: 4,
+    flowX: 1,
+    flowY: 1,
+    textureWidth: 1024,
+    textureHeight: 1024,
+  });
+
+  water2.position.y = 1;
+  water2.rotation.x = Math.PI * -0.5;
+
   //Add plano na cena
   scene.add(plane);
+  scene.add(water);
+  scene.add(dirtRight);
+  scene.add(dirtLeft);
+  scene.add(grassRight);
+  scene.add(grassLeft);
+
   scene.add(plane2);
+  scene.add(water2);
+  scene.add(dirtRight2);
+  scene.add(dirtLeft2);
+  scene.add(grassRight2);
+  scene.add(grassLeft2);
+
   //Set a posição do plano
   plane.position.z = 0;
+  water.position.z = 0;
+  dirtRight.position.z = 0;
+  dirtLeft.position.z = 0;
+  grassLeft.position.z = 0;
+  grassRight.position.z = 0;
+  grassLeft.position.y = 2;
+  grassRight.position.y = 2;
+
   plane2.position.z = -planeSize;
+  water2.position.z = -planeSize;
+  dirtRight2.position.z = -planeSize;
+  dirtLeft2.position.z = -planeSize;
+  grassLeft2.position.z = -planeSize;
+  grassRight2.position.z = -planeSize;
+  grassLeft2.position.y = 2;
+  grassRight2.position.y = 2;
 
   //Configurações de controle do plano
   limiterPlane = -planeSize;
@@ -712,12 +876,32 @@ function restart() {
 
     enemyList.splice(0, enemyList.length);
 
+    landenemyList.forEach(function (enemy) {
+      removeFromScene(enemy.cube, 0); //Remove da cena
+      removeFromScene(enemy.obj, 0); //Remove da cena
+    });
+
+    landenemyList.splice(0,  landenemyList.length);
+
     targetObject.position.z = 0;
     lightPosition.z = 0;
     updateLightPosition();
 
-    plane.position.z = 0; //Reseta os planos
+    //Resets planes
+    plane.position.z = 0;
+    water.position.z = 0;
+    dirtRight.position.z = 0;
+    dirtLeft.position.z = 0;
+    grassLeft.position.z = 0;
+    grassRight.position.z = 0;
+
     plane2.position.z = -planeSize;
+    water2.position.z = -planeSize;
+    dirtRight2.position.z = -planeSize;
+    dirtLeft2.position.z = -planeSize;
+    grassLeft2.position.z = -planeSize;
+    grassRight2.position.z = -planeSize;
+
     cameraHolder.position.z = 0; //Reseta a camera
     player.setPosition(posInitPlayerX, posInitPlayerY, posInitPlayerZ); //Reseta o player
 
@@ -769,6 +953,18 @@ function endGame() {
   }, 1000);
 }
 
+function gamePause() {
+  if (start) {
+    pause = !pause;
+    if (pause) {
+      sound.pause();
+    } else sound.play();
+  }
+}
+function gameCheat() {
+  cheating = !cheating;
+}
+
 export {
   scene,
   scene2,
@@ -781,4 +977,6 @@ export {
   renderer,
   globalScaleWidth,
   restart,
+  gamePause,
+  gameCheat,
 };
